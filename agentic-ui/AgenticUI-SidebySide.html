@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Agentic UI Showcase — CopilotKit vs A2UI</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --panel: #ffffff;
+    --ink: #0f172a;
+    --ink-2: #334155;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --accent: #2563eb;
+    --accent-2: #7c3aed;
+    --copilot: #0ea5e9;
+    --a2ui: #16a34a;
+    --warn: #d97706;
+    --danger: #dc2626;
+    --code-bg: #0b1220;
+    --code-ink: #e2e8f0;
+    --shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.06);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif;
+    font-size: 14px; line-height: 1.5;
+  }
+  header.top {
+    background: linear-gradient(180deg, #0f172a, #1e293b);
+    color: #fff; padding: 22px 32px; border-bottom: 1px solid #0b1220;
+  }
+  header.top h1 { margin: 0 0 4px; font-size: 20px; font-weight: 600; letter-spacing: -.01em; }
+  header.top p { margin: 0; color: #94a3b8; font-size: 13px; }
+  header.top .badges { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 500;
+    background: rgba(255,255,255,.08); color: #cbd5e1; border: 1px solid rgba(255,255,255,.12);
+  }
+  .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; }
+  .badge.copilot .dot { background: var(--copilot); }
+  .badge.a2ui .dot { background: var(--a2ui); }
+
+  nav.tabs {
+    background: var(--panel); border-bottom: 1px solid var(--line);
+    padding: 0 32px; display: flex; gap: 4px; overflow-x: auto;
+    position: sticky; top: 0; z-index: 10; box-shadow: var(--shadow);
+  }
+  nav.tabs button {
+    appearance: none; background: transparent; border: 0; cursor: pointer;
+    padding: 14px 16px; font-size: 13px; font-weight: 500; color: var(--muted);
+    border-bottom: 2px solid transparent; white-space: nowrap;
+    font-family: inherit;
+  }
+  nav.tabs button:hover { color: var(--ink); }
+  nav.tabs button.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  main { padding: 24px 32px 64px; max-width: 1600px; margin: 0 auto; }
+
+  .scenario-header { margin-bottom: 16px; }
+  .scenario-header h2 { margin: 0 0 4px; font-size: 18px; font-weight: 600; }
+  .scenario-header .sub { color: var(--muted); font-size: 13px; }
+  .scenario-header .meta {
+    margin-top: 10px; display: flex; gap: 16px; flex-wrap: wrap;
+    padding: 10px 14px; background: #eff6ff; border: 1px solid #dbeafe;
+    border-radius: 8px; font-size: 12px; color: #1e40af;
+  }
+  .scenario-header .meta b { color: #1e3a8a; font-weight: 600; }
+
+  .split {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  @media (max-width: 1100px) { .split { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+    box-shadow: var(--shadow); overflow: hidden;
+  }
+  .panel-head {
+    padding: 12px 14px; border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    background: #fafbfc;
+  }
+  .panel-head .title { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13px; }
+  .panel-head .title .swatch { width: 10px; height: 10px; border-radius: 3px; }
+  .panel-head .title .swatch.copilot { background: var(--copilot); }
+  .panel-head .title .swatch.a2ui { background: var(--a2ui); }
+  .panel-head .tag { font-size: 11px; color: var(--muted); font-weight: 500; }
+  .panel-body { padding: 14px; min-height: 360px; }
+
+  /* Chat-style surface */
+  .chat { display: flex; flex-direction: column; gap: 10px; }
+  .msg { padding: 10px 12px; border-radius: 8px; max-width: 88%; font-size: 13px; }
+  .msg.user { align-self: flex-end; background: #1e293b; color: #fff; }
+  .msg.bot { align-self: flex-start; background: #f1f5f9; color: var(--ink); }
+  .msg.bot .role { display: block; font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .04em; color: var(--muted); margin-bottom: 4px; }
+
+  /* Generative widgets */
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
+  .product {
+    border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: #fff;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .product .px { font-size: 11px; color: var(--muted); }
+  .product .pn { font-weight: 600; font-size: 13px; }
+  .product .pp { color: var(--accent); font-weight: 600; font-size: 13px; }
+  .product button { margin-top: 6px; }
+
+  button.btn, .btn {
+    appearance: none; border: 1px solid var(--accent); background: var(--accent); color: #fff;
+    padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer;
+    font-family: inherit;
+  }
+  button.btn.ghost { background: #fff; color: var(--accent); }
+  button.btn.warn { background: var(--warn); border-color: var(--warn); }
+  button.btn.danger { background: var(--danger); border-color: var(--danger); }
+  button.btn.muted { background: #fff; color: var(--ink-2); border-color: var(--line); }
+  button.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* Compare table */
+  table.compare { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+  table.compare th, table.compare td { padding: 6px 8px; border: 1px solid var(--line); text-align: left; }
+  table.compare th { background: #f8fafc; font-weight: 600; }
+
+  /* Configure canvas form */
+  .form-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+  .form-row label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+  .form-row select, .form-row input {
+    padding: 7px 9px; border: 1px solid var(--line); border-radius: 6px; font-size: 13px; background: #fff;
+    font-family: inherit;
+  }
+  .stepper { display: flex; gap: 4px; margin-bottom: 12px; }
+  .stepper .step {
+    flex: 1; padding: 6px 8px; font-size: 11px; text-align: center;
+    background: #f1f5f9; border-radius: 4px; color: var(--muted); font-weight: 500;
+  }
+  .stepper .step.active { background: var(--accent); color: #fff; }
+  .price-card {
+    margin-top: 10px; padding: 10px 12px; background: #f0fdf4;
+    border: 1px solid #bbf7d0; border-radius: 8px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .price-card .lbl { font-size: 11px; color: #166534; text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+  .price-card .val { font-size: 18px; font-weight: 700; color: #14532d; }
+
+  /* Account / PII */
+  .acct-row {
+    display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; align-items: center;
+    padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .acct-row .pii { font-family: ui-monospace, monospace; color: var(--muted); }
+  .pill { font-size: 10px; padding: 2px 7px; border-radius: 999px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .pill.ok { background: #d1fae5; color: #065f46; }
+  .pill.warn { background: #fef3c7; color: #92400e; }
+  .pill.info { background: #dbeafe; color: #1e40af; }
+
+  /* HITL modal */
+  .hitl {
+    margin-top: 8px; padding: 12px; border: 1px dashed var(--warn);
+    background: #fffbeb; border-radius: 8px;
+  }
+  .hitl .h { font-weight: 600; font-size: 13px; color: var(--warn); margin-bottom: 6px; }
+  .hitl .actions { display: flex; gap: 8px; margin-top: 8px; }
+
+  /* Router visualization */
+  .router-box {
+    border: 1px solid var(--line); border-radius: 8px; padding: 10px; margin-top: 8px;
+    background: #fafbfc;
+  }
+  .router-box .node {
+    display: inline-block; padding: 5px 10px; margin: 4px;
+    border-radius: 6px; font-size: 11px; font-weight: 600; background: #e2e8f0; color: var(--ink-2);
+    border: 1px solid var(--line);
+  }
+  .router-box .node.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* Event log */
+  .eventlog {
+    margin-top: 16px; background: var(--code-bg); color: var(--code-ink);
+    border-radius: 10px; padding: 14px; font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px; max-height: 240px; overflow-y: auto; box-shadow: var(--shadow);
+  }
+  .eventlog .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+    padding-bottom: 8px; border-bottom: 1px solid #1e293b;
+  }
+  .eventlog .head .t { font-weight: 600; color: #f1f5f9; font-family: inherit; font-size: 12px; }
+  .eventlog .head .sub { color: #64748b; font-family: inherit; font-size: 11px; }
+  .eventlog .ev { padding: 3px 0; }
+  .eventlog .ev .ts { color: #64748b; }
+  .eventlog .ev .ty { font-weight: 600; }
+  .eventlog .ev.text .ty { color: #38bdf8; }
+  .eventlog .ev.tool .ty { color: #fbbf24; }
+  .eventlog .ev.gen  .ty { color: #a78bfa; }
+  .eventlog .ev.state .ty { color: #34d399; }
+  .eventlog .ev.intr .ty { color: #fb7185; }
+  .eventlog .ev.handoff .ty { color: #f472b6; }
+  .eventlog .ev .src { font-size: 10px; padding: 1px 5px; border-radius: 3px; margin-right: 6px; }
+  .eventlog .ev .src.cp { background: #075985; color: #e0f2fe; }
+  .eventlog .ev .src.a2 { background: #166534; color: #dcfce7; }
+
+  /* Comparison block */
+  .compare-block {
+    margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  @media (max-width: 1100px) { .compare-block { grid-template-columns: 1fr; } }
+  .codecard { background: var(--code-bg); border-radius: 10px; overflow: hidden; box-shadow: var(--shadow); }
+  .codecard .hd { padding: 10px 14px; background: #1e293b; color: #f1f5f9; font-size: 12px; font-weight: 600;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .codecard .hd .lbl { color: #94a3b8; font-weight: 500; font-size: 11px; }
+  .codecard pre { margin: 0; padding: 14px; font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+    color: var(--code-ink); overflow-x: auto; line-height: 1.55;
+  }
+  .codecard pre .k { color: #c084fc; }
+  .codecard pre .s { color: #86efac; }
+  .codecard pre .c { color: #64748b; font-style: italic; }
+  .codecard pre .n { color: #fbbf24; }
+  .codecard pre .t { color: #38bdf8; }
+
+  /* Controls bar */
+  .controls {
+    display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap;
+  }
+  .controls .spacer { flex: 1; }
+  .controls .hint { font-size: 12px; color: var(--muted); }
+
+  /* Verdict cards */
+  .verdict {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px;
+  }
+  @media (max-width: 1100px) { .verdict { grid-template-columns: 1fr; } }
+  .vcard { padding: 12px 14px; border-radius: 8px; border: 1px solid var(--line); background: #fafbfc; font-size: 12px; }
+  .vcard h4 { margin: 0 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .vcard .pros li { color: #166534; }
+  .vcard .cons li { color: #991b1b; }
+  .vcard ul { margin: 4px 0; padding-left: 18px; }
+
+  /* Matrix table on overview */
+  table.matrix { width: 100%; border-collapse: collapse; font-size: 12px; background: #fff;
+    border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+  }
+  table.matrix th, table.matrix td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  table.matrix th { background: #f8fafc; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  table.matrix tbody tr:last-child td { border-bottom: 0; }
+  table.matrix .yes { color: #16a34a; font-weight: 600; }
+  table.matrix .partial { color: #d97706; font-weight: 600; }
+  table.matrix .no { color: #94a3b8; }
+
+  .kv { display: grid; grid-template-columns: 160px 1fr; gap: 4px 12px; font-size: 12px; margin-top: 8px; }
+  .kv dt { color: var(--muted); font-weight: 500; }
+  .kv dd { margin: 0; color: var(--ink); }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>Agentic UI Showcase — CopilotKit + AG-UI vs Google A2UI</h1>
+  <p>Side-by-side technical comparison for enterprise adoption · 5 scenarios · mock data · vanilla JS</p>
+  <div class="badges">
+    <span class="badge"><span class="dot"></span>AG-UI protocol (transport)</span>
+    <span class="badge copilot"><span class="dot"></span>CopilotKit · tool-as-component</span>
+    <span class="badge a2ui"><span class="dot"></span>A2UI · declarative UI tree</span>
+    <span class="badge"><span class="dot"></span>LangGraph / MAF runtime (mocked)</span>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button data-tab="overview" class="active">Overview</button>
+  <button data-tab="shop">1. Shop · Generative Cards</button>
+  <button data-tab="configure">2. Configure · Canvas + Shared State</button>
+  <button data-tab="support">3. Support · HITL + Handoff</button>
+  <button data-tab="account">4. Account · PII Whitelist</button>
+  <button data-tab="router">5. Cross-Domain Router</button>
+  <button data-tab="verdict">Adoption Verdict</button>
+</nav>
+
+<main>
+
+<!-- ================== OVERVIEW ================== -->
+<section data-section="overview">
+  <div class="scenario-header">
+    <h2>The four-layer stack — and where these two toolkits fit</h2>
+    <div class="sub">CopilotKit and A2UI are <b>not competitors</b> — they sit at different layers and are complementary in production.
+      This showcase demonstrates each in isolation so the trade-offs are visible.</div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-body">
+      <table class="matrix">
+        <thead>
+          <tr><th>Layer</th><th>Concern</th><th style="color:var(--copilot)">CopilotKit</th><th style="color:var(--a2ui)">A2UI</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><b>UI Description</b></td><td>What the UI <i>is</i></td>
+            <td>Typed React widgets bound to tool calls (<code>useCopilotAction</code> + <code>render</code>)</td>
+            <td>Flat JSON component tree against a client catalog; data-bound by ID</td></tr>
+          <tr><td><b>Agent ↔ User</b></td><td>How runs stream to UI</td>
+            <td>Native AG-UI client (incubated AG-UI)</td>
+            <td>Payload format inside AG-UI gen-UI events; framework-agnostic</td></tr>
+          <tr><td><b>Runtime</b></td><td>Orchestration</td>
+            <td>LangGraph, CrewAI, MAF, OpenAI, AWS, Google ADK</td>
+            <td>Any runtime that can emit declarative trees</td></tr>
+          <tr><td><b>Client</b></td><td>Where it renders</td>
+            <td>React (Angular WIP)</td>
+            <td>React, Flutter, SwiftUI, Compose — any platform with a catalog</td></tr>
+          <tr><td><b>Generative UI</b></td><td>Per-tool rich UI</td>
+            <td class="yes">First-class</td>
+            <td class="yes">First-class (the whole point)</td></tr>
+          <tr><td><b>Shared state / CoAgents</b></td><td>Bidirectional state</td>
+            <td class="yes">First-class (CoAgents)</td>
+            <td class="yes">Built-in (data-path bindings)</td></tr>
+          <tr><td><b>Human-in-the-loop</b></td><td>Interrupts</td>
+            <td class="yes">First-class</td>
+            <td class="partial">Via host + AG-UI interrupt event</td></tr>
+          <tr><td><b>Cross-platform</b></td><td>Mobile / desktop</td>
+            <td class="no">Web-first (React)</td>
+            <td class="yes">Native portability</td></tr>
+          <tr><td><b>Maturity</b></td><td>Production readiness</td>
+            <td class="yes">GA, Apache-2.0, broad runtime support</td>
+            <td class="partial">v0.9, Dec 2025; spec stabilizing</td></tr>
+          <tr><td><b>Component security</b></td><td>Catalog whitelist</td>
+            <td class="partial">Per-tool React components (you own them)</td>
+            <td class="yes">Hard catalog gate (agent can only request, not define)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="compare-block">
+    <div class="vcard">
+      <h4>How to read this showcase</h4>
+      <ul>
+        <li>Each scenario tab shows the <b>same agent task</b> implemented twice.</li>
+        <li><b>Left pane</b> = CopilotKit (typed React tool component).</li>
+        <li><b>Right pane</b> = A2UI (declarative JSON tree against a catalog).</li>
+        <li>The <b>shared event log</b> below each scenario shows the AG-UI events both panes consume — <i>same protocol, different rendering</i>.</li>
+        <li>At the bottom of each scenario, the <b>code comparison</b> shows the actual integration patterns.</li>
+      </ul>
+    </div>
+    <div class="vcard">
+      <h4>The key insight for executives</h4>
+      <ul>
+        <li><b>AG-UI is the wire.</b> Both toolkits ride on the same event protocol — adopting one does not lock you out of the other.</li>
+        <li><b>CopilotKit wins today</b> for React-only enterprise web apps with strong typing and fast iteration.</li>
+        <li><b>A2UI wins tomorrow</b> when the platform must reach mobile/desktop or be rendered by partner-owned clients.</li>
+        <li><b>Recommended pattern:</b> CopilotKit chrome + A2UI payloads inside generative-UI events as A2UI matures past v0.9.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================== SHOP ================== -->
+<section data-section="shop" class="hidden">
+  <div class="scenario-header">
+    <h2>Scenario 1 — Shop · "Find me a 4K monitor under $500"</h2>
+    <div class="sub">Inline chat with rich generative cards; promotion to canvas mode for compare.</div>
+    <div class="meta">
+      <span><b>Pattern:</b> Tool-as-component (CopilotKit) vs Declarative tree (A2UI)</span>
+      <span><b>AG-UI events:</b> TEXT_MESSAGE, TOOL_CALL, GEN_UI</span>
+      <span><b>State:</b> client-only cart</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" onclick="runShop()">▶ Run scenario</button>
+    <button class="btn muted" onclick="runShopCompare()">↳ Click "Compare top 3" simulation</button>
+    <button class="btn muted" onclick="resetShop()">Reset</button>
+    <span class="spacer"></span>
+    <span class="hint">Mock latency simulates real streaming</span>
+  </div>
+
+  <div class="split">
+    <!-- COPILOTKIT PANE -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="title"><span class="swatch copilot"></span> CopilotKit · React tool-as-component</div>
+        <span class="tag">useCopilotAction({ render })</span>
+      </div>
+      <div class="panel-body">
+        <div class="chat" id="shop-cp-chat"></div>
+      </div>
+    </div>
+    <!-- A2UI PANE -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="title"><span class="swatch a2ui"></span> A2UI · declarative tree → catalog</div>
+        <span class="tag">component_id → registry lookup</span>
+      </div>
+      <div class="panel-body">
+        <div class="chat" id="shop-a2-chat"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="eventlog" id="shop-log">
+    <div class="head"><span class="t">AG-UI event stream (shared)</span><span class="sub">Both clients consume the same events</span></div>
+  </div>
+
+  <div class="compare-block">
+    <div class="codecard">
+      <div class="hd"><span>CopilotKit</span><span class="lbl">React · TypeScript</span></div>
+<pre><span class="c">// 1. Define a typed action; the agent can call it.</span>
+useCopilotAction({
+  name: <span class="s">"searchProducts"</span>,
+  parameters: [
+    { name: <span class="s">"maxPrice"</span>, type: <span class="s">"number"</span> },
+    { name: <span class="s">"resolution"</span>, type: <span class="s">"string"</span> }
+  ],
+  handler: async ({ maxPrice, resolution }) =&gt;
+    api.search({ maxPrice, resolution }),
+
+  <span class="c">// 2. Frontend OWNS the renderer for this tool.</span>
+  render: ({ status, args, result }) =&gt; (
+    status === <span class="s">"executing"</span>
+      ? &lt;<span class="t">SkeletonGrid</span> /&gt;
+      : &lt;<span class="t">ProductGrid</span> items={result} onAdd={addToCart} /&gt;
+  )
+});</pre>
+    </div>
+    <div class="codecard">
+      <div class="hd"><span>A2UI</span><span class="lbl">JSON tree · framework-agnostic</span></div>
+<pre><span class="c">// 1. Agent emits a flat tree; client looks up components by id.</span>
+{
+  <span class="n">"components"</span>: [
+    { <span class="n">"id"</span>: <span class="s">"grid1"</span>, <span class="n">"type"</span>: <span class="s">"ProductGrid"</span>,
+      <span class="n">"props"</span>: { <span class="n">"itemsRef"</span>: <span class="s">"/state/results"</span> } }
+  ],
+  <span class="n">"state"</span>: {
+    <span class="n">"results"</span>: [
+      { <span class="n">"id"</span>: <span class="s">"m1"</span>, <span class="n">"name"</span>: <span class="s">"Acme U28"</span>, <span class="n">"price"</span>: 449 }
+    ]
+  }
+}
+
+<span class="c">// 2. Client catalog (one-time registration, web/iOS/Android share spec)</span>
+catalog.register(<span class="s">"ProductGrid"</span>, ProductGridReact);
+catalog.register(<span class="s">"ProductGrid"</span>, ProductGridFlutter);</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ================== CONFIGURE ================== -->
+<section data-section="configure" class="hidden">
+  <div class="scenario-header">
+    <h2>Scenario 2 — Configure · "Build my laptop" (Canvas + Shared State)</h2>
+    <div class="sub">Multi-step form, conditional fields, live price recompute. The UI mutates densely as the agent recomputes constraints.</div>
+    <div class="meta">
+      <span><b>Pattern:</b> Shared state via CoAgents (CopilotKit) vs Data-path bindings (A2UI)</span>
+      <span><b>AG-UI events:</b> GEN_UI, STATE_PATCH, INTERRUPT</span>
+      <span><b>Sweet spot for A2UI:</b> dense reactive forms</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" onclick="runConfigure()">▶ Initialize canvas</button>
+    <button class="btn muted" onclick="configBuy()">Click "Buy" (triggers HITL interrupt)</button>
+    <button class="btn muted" onclick="resetConfigure()">Reset</button>
+  </div>
+
+  <div class="split">
+    <div class="panel">
+      <div class="panel-head">
+        <div class="title"><span class="swatch copilot"></span> CopilotKit · CoAgent shared state</div>
+        <span class="tag">useCoAgent&lt;ConfigState&gt;()</span>
+      </div>
+      <div class="panel-body" id="cfg-cp"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <div class="title"><span class="swatch a2ui"></span> A2UI · data-path bindings</div>
+        <span class="tag">props.valueRef = "/cfg/ram"</span>
+      </div>
+      <div class="panel-body" id="cfg-a2"></div>
+    </div>
+  </div>
+
+  <div class="eventlog" id="cfg-log">
+    <div class="head"><span class="t">AG-UI event stream (shared)</span><span class="sub">Watch state-patch events as you change fields</span></div>
+  </div>
+
+  <div class="compare-block">
+    <div class="codecard">
+      <div class="hd"><span>CopilotKit · CoAgent</span><span class="lbl">React hook</span></div>
+<pre><span class="c">// One bidirectional state object shared with the agent.</span>
+const { state, setState } = useCoAgent&lt;<span class="t">ConfigState</span>&gt;({
+  name: <span class="s">"configure-agent"</span>,
+  initialState: { chassis: <span class="s">"X14"</span>, ram: 16, price: 1299 }
+});
+
+<span class="c">// User edits → setState → patch streams to agent.</span>
+&lt;select value={state.ram}
+  onChange={e =&gt; setState({ ...state, ram: +e.target.value })}&gt;
+  {state.ramOptions.map(o =&gt; &lt;option&gt;{o}&lt;/option&gt;)}
+&lt;/select&gt;
+
+<span class="c">// Agent recomputes price → state arrives back automatically.</span></pre>
+    </div>
+    <div class="codecard">
+      <div class="hd"><span>A2UI · binding</span><span class="lbl">JSON tree</span></div>
+<pre>{
+  <span class="n">"components"</span>: [
+    { <span class="n">"id"</span>: <span class="s">"ram1"</span>, <span class="n">"type"</span>: <span class="s">"Select"</span>,
+      <span class="n">"props"</span>: {
+        <span class="n">"valueRef"</span>: <span class="s">"/cfg/ram"</span>,
+        <span class="n">"optionsRef"</span>: <span class="s">"/cfg/ramOptions"</span>
+      }},
+    { <span class="n">"id"</span>: <span class="s">"price1"</span>, <span class="n">"type"</span>: <span class="s">"PriceCard"</span>,
+      <span class="n">"props"</span>: { <span class="n">"valueRef"</span>: <span class="s">"/cfg/price"</span> }}
+  ]
+}
+
+<span class="c">// Agent emits state patch only:</span>
+{ <span class="n">"op"</span>: <span class="s">"replace"</span>, <span class="n">"path"</span>: <span class="s">"/cfg/price"</span>, <span class="n">"value"</span>: 1599 }
+<span class="c">// All bound components re-render automatically.</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ================== SUPPORT ================== -->
+<section data-section="support" class="hidden">
+  <div class="scenario-header">
+    <h2>Scenario 3 — Support · HITL + Live Agent Handoff</h2>
+    <div class="sub">Triage agent → refund specialist → human escalation. Refund &gt;$100 requires human approval.</div>
+    <div class="meta">
+      <span><b>Pattern:</b> AG-UI interrupt events gating write actions</span>
+      <span><b>AG-UI events:</b> HANDOFF, INTERRUPT, RESUME, STEERING</span>
+      <span><b>Compliance:</b> never trust agent autonomy on customer writes</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" onclick="runSupport()">▶ "I want a refund for order #4421"</button>
+    <button class="btn muted" onclick="resetSupport()">Reset</button>
+  </div>
+
+  <div class="split">
+    <div class="panel">
+      <div class="panel-head">
+        <div class="title"><span class="swatch copilot"></span> CopilotKit · useCopilotInterrupt</div>
+        <span class="tag">first-class HITL primitive</span>
+      </div>
+      <div class="panel-body"><div class="chat" id="sup-cp"></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <div class="title"><span class="swatch a2ui"></span> A2UI · interrupt component in tree</div>
+        <span class="tag">host renders ConfirmDialog from catalog</span>
+      </div>
+      <div class="panel-body"><div class="chat" id="sup-a2"></div></div>
+    </div>
+  </div>
+
+  <div class="eventlog" id="sup-log">
+    <div class="head"><span class="t">AG-UI event stream</span><span class="sub">Note the HANDOFF and INTERRUPT events</span></div>
+  </div>
+
+  <div class="compare-block">
+    <div class="codecard">
+      <div class="hd"><span>CopilotKit</span><span class="lbl">first-class interrupt hook</span></div>
+<pre>useCopilotInterrupt({
+  name: <span class="s">"approveRefund"</span>,
+  render: ({ args, respond }) =&gt; (
+    &lt;<span class="t">ConfirmDialog</span>
+      title={<span class="s">"Approve refund of $"</span> + args.amount}
+      onApprove={() =&gt; respond({ approved: true })}
+      onDeny={() =&gt; respond({ approved: false })}
+    /&gt;
+  )
+});
+
+<span class="c">// Agent pause/resume is automatic; respond() unblocks the run.</span></pre>
+    </div>
+    <div class="codecard">
+      <div class="hd"><span>A2UI</span><span class="lbl">interrupt arrives as a tree node</span></div>
+<pre><span class="c">// Agent emits an interrupt frame:</span>
+{
+  <span class="n">"interrupt"</span>: <span class="s">"refund_4421"</span>,
+  <span class="n">"components"</span>: [{
+    <span class="n">"id"</span>: <span class="s">"dlg1"</span>, <span class="n">"type"</span>: <span class="s">"ConfirmDialog"</span>,
+    <span class="n">"props"</span>: {
+      <span class="n">"title"</span>: <span class="s">"Approve refund of $149"</span>,
+      <span class="n">"onApprove"</span>: { <span class="n">"emit"</span>: <span class="s">"resume"</span>, <span class="n">"value"</span>: { approved: <span class="k">true</span> } },
+      <span class="n">"onDeny"</span>:    { <span class="n">"emit"</span>: <span class="s">"resume"</span>, <span class="n">"value"</span>: { approved: <span class="k">false</span> } }
+    }
+  }]
+}
+<span class="c">// Host catalog wires onApprove/onDeny to the AG-UI resume event.</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ================== ACCOUNT ================== -->
+<section data-section="account" class="hidden">
+  <div class="scenario-header">
+    <h2>Scenario 4 — Account · PII Whitelist & Component Boundary</h2>
+    <div class="sub">Agent can request <i>views</i> of sensitive data, but never receives raw PII. The component renders server-redacted values.</div>
+    <div class="meta">
+      <span><b>Pattern:</b> Strict component whitelist; structured outputs at tool boundary</span>
+      <span><b>Risk closed:</b> LLM exfiltration of card numbers / addresses</span>
+      <span><b>A2UI native advantage:</b> catalog is the security gate</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" onclick="runAccount()">▶ "Show me my recent orders and payment methods"</button>
+    <button class="btn muted" onclick="runAccountAttack()">⚠ Try malicious component (raw PII)</button>
+    <button class="btn muted" onclick="resetAccount()">Reset</button>
+  </div>
+
+  <div class="split">
+    <div class="panel">
+      <div class="panel-head">
+        <div class="title"><span class="swatch copilot"></span> CopilotKit · pre-registered actions only</div>
+        <span class="tag">no action = no render</span>
+      </div>
+      <div class="panel-body" id="acct-cp"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <div class="title"><span class="swatch a2ui"></span> A2UI · catalog rejects unknown component</div>
+        <span class="tag">spec-mandated whitelist</span>
+      </div>
+      <div class="panel-body" id="acct-a2"></div>
+    </div>
+  </div>
+
+  <div class="eventlog" id="acct-log">
+    <div class="head"><span class="t">AG-UI event stream</span><span class="sub">Watch the rejected component event in attack mode</span></div>
+  </div>
+
+  <div class="compare-block">
+    <div class="codecard">
+      <div class="hd"><span>CopilotKit</span><span class="lbl">action allowlist + Zod schema</span></div>
+<pre>useCopilotAction({
+  name: <span class="s">"showOrders"</span>,
+  parameters: [],
+  handler: async () =&gt; api.orders.listRedacted(userId),
+  render: ({ result }) =&gt; &lt;<span class="t">OrdersTable</span> rows={result} /&gt;
+});
+
+<span class="c">// Tool returns server-redacted data:</span>
+<span class="c">// { id: "4421", total: "$149", card: "•••• 4242" }</span>
+<span class="c">// Raw PII never crosses the agent boundary.</span></pre>
+    </div>
+    <div class="codecard">
+      <div class="hd"><span>A2UI</span><span class="lbl">client catalog is the gate</span></div>
+<pre><span class="c">// Client registers ONLY approved component ids.</span>
+catalog.register(<span class="s">"OrdersTable"</span>, OrdersTable);
+catalog.register(<span class="s">"PaymentMethodList"</span>, PaymentMethodList);
+
+<span class="c">// Agent tries a custom component — rejected.</span>
+agentEmit({ <span class="n">"type"</span>: <span class="s">"RawCardDisplay"</span>, ... });
+<span class="c">// → Catalog: "RawCardDisplay" not registered. Drop frame.</span>
+<span class="c">// → A2UI spec: agents *request*, never *define* components.</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ================== ROUTER ================== -->
+<section data-section="router" class="hidden">
+  <div class="scenario-header">
+    <h2>Scenario 5 — Cross-Domain Router · Single chat, many specialists</h2>
+    <div class="sub">One AG-UI session; the router classifies intent and hands off to Shop / Configure / Support / Account agents. Frontend stays unaware of which is active.</div>
+    <div class="meta">
+      <span><b>Pattern:</b> Handoff orchestration (LangGraph or MAF)</span>
+      <span><b>AG-UI events:</b> HANDOFF, THINKING_STEP, namespaced STATE_PATCH</span>
+      <span><b>Continuity:</b> single thread across domains</span>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" onclick="runRouter('shop')">"Find me a 4K monitor"</button>
+    <button class="btn" onclick="runRouter('config')">"Configure a laptop"</button>
+    <button class="btn" onclick="runRouter('support')">"Cancel my last order"</button>
+    <button class="btn muted" onclick="resetRouter()">Reset</button>
+  </div>
+
+  <div class="split">
+    <div class="panel">
+      <div class="panel-head">
+        <div class="title"><span class="swatch copilot"></span> CopilotKit · CoAgents w/ namespaced state</div>
+        <span class="tag">domain switches transparently</span>
+      </div>
+      <div class="panel-body">
+        <div class="router-box" id="router-cp-graph"></div>
+        <div class="chat" id="router-cp"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <div class="title"><span class="swatch a2ui"></span> A2UI · catalog covers all domains</div>
+        <span class="tag">tree replaced per handoff</span>
+      </div>
+      <div class="panel-body">
+        <div class="router-box" id="router-a2-graph"></div>
+        <div class="chat" id="router-a2"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="eventlog" id="router-log">
+    <div class="head"><span class="t">AG-UI event stream</span><span class="sub">HANDOFF events show sub-agent identity</span></div>
+  </div>
+
+  <div class="compare-block">
+    <div class="codecard">
+      <div class="hd"><span>CopilotKit</span><span class="lbl">single mount, per-agent state slot</span></div>
+<pre>&lt;<span class="t">CopilotKit</span> runtimeUrl=<span class="s">"/api/agui"</span>&gt;
+  &lt;<span class="t">CopilotChat</span>
+    agents={[<span class="s">"router"</span>, <span class="s">"shop"</span>, <span class="s">"configure"</span>, <span class="s">"support"</span>]} /&gt;
+&lt;/<span class="t">CopilotKit</span>&gt;
+
+<span class="c">// All registered useCopilotAction renderers are available;</span>
+<span class="c">// the active sub-agent picks which to invoke.</span>
+<span class="c">// THINKING_STEP events expose the sub-agent label only.</span></pre>
+    </div>
+    <div class="codecard">
+      <div class="hd"><span>A2UI</span><span class="lbl">domain-agnostic renderer</span></div>
+<pre><span class="c">// One catalog covers components from every domain agent.</span>
+catalog.register(<span class="s">"ProductGrid"</span>, ...);   <span class="c">// Shop</span>
+catalog.register(<span class="s">"ConfigureForm"</span>, ...); <span class="c">// Configure</span>
+catalog.register(<span class="s">"TicketCard"</span>, ...);   <span class="c">// Support</span>
+catalog.register(<span class="s">"OrdersTable"</span>, ...);  <span class="c">// Account</span>
+
+<span class="c">// On handoff, agent emits a fresh tree;</span>
+<span class="c">// the renderer doesn't care which agent produced it.</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ================== VERDICT ================== -->
+<section data-section="verdict" class="hidden">
+  <div class="scenario-header">
+    <h2>Adoption Verdict — for an enterprise e-commerce platform</h2>
+    <div class="sub">Distilled from the five scenarios above and the AgenticUI reference document.</div>
+  </div>
+
+  <div class="verdict">
+    <div class="vcard">
+      <h4 style="color:var(--copilot)">CopilotKit · ship today</h4>
+      <div><b>Recommended for: phase 1–3 of platform rollout (next 1–2 quarters).</b></div>
+      <ul class="pros">
+        <li>GA, Apache-2.0, broad runtime support (LangGraph, MAF, ADK, AWS, OpenAI)</li>
+        <li>First-class generative UI, CoAgents, HITL, agent steering</li>
+        <li>Type safety end-to-end (Zod / JSON-Schema → tool → component)</li>
+        <li>Highest-fidelity React UX; hand-tuned per domain</li>
+        <li>Best fit for Shop, Account, Support today</li>
+      </ul>
+      <ul class="cons">
+        <li>React-only on the open path (Angular WIP)</li>
+        <li>Each tool needs its own component; cross-platform requires re-shipping per renderer</li>
+        <li>Less natural for dense reactive forms (Configure)</li>
+      </ul>
+    </div>
+
+    <div class="vcard">
+      <h4 style="color:var(--a2ui)">A2UI · adopt strategically</h4>
+      <div><b>Recommended for: Configure canvas surfaces and any non-web client (mobile/desktop/partner).</b></div>
+      <ul class="pros">
+        <li>Framework-agnostic (React, Flutter, SwiftUI, Compose) from one agent payload</li>
+        <li>Catalog-as-security: components are pre-approved; agents cannot define new ones</li>
+        <li>Data-path bindings make dense reactive forms cheaper than per-permutation components</li>
+        <li>Native fit for the Configure canvas and partner-embedded surfaces</li>
+      </ul>
+      <ul class="cons">
+        <li>v0.9 spec — re-validate before standardizing platform-wide</li>
+        <li>Less expressive than hand-written React for one-off rich UX</li>
+        <li>Requires you to maintain a robust component catalog up front</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:18px">
+    <div class="panel-head"><div class="title">Recommended hybrid stack</div></div>
+    <div class="panel-body">
+      <dl class="kv">
+        <dt>Wire protocol</dt><dd>AG-UI (open, Apache-2.0, broad runtime support)</dd>
+        <dt>Frontend toolkit</dt><dd>CopilotKit for the chrome (chat, sidebar, HITL, CoAgents)</dd>
+        <dt>Rendering — Shop/Account/Support</dt><dd>Tool-as-component via <code>useCopilotAction</code></dd>
+        <dt>Rendering — Configure/Canvas/Partner</dt><dd>Declarative widget JSON; <b>migrate to A2UI when v1.0 lands</b></dd>
+        <dt>Runtime</dt><dd>LangGraph (TS or Python) or Microsoft Agent Framework</dd>
+        <dt>Patterns supported</dt><dd>Sequential · Concurrent · Group chat · Handoff · Magentic</dd>
+        <dt>Security boundary</dt><dd>Zod / Pydantic structured outputs at tool layer; component catalog whitelist at UI layer; AG-UI interrupts on every write action</dd>
+      </dl>
+      <div style="margin-top:14px; padding:12px; background:#eff6ff; border:1px solid #dbeafe; border-radius:8px; font-size:13px; color:#1e3a8a;">
+        <b>Bottom line:</b> these are <i>not</i> rival vendors — they are layers of the same stack. Adopt CopilotKit + AG-UI now; add A2UI as a payload format inside generative-UI events when the platform extends to mobile/desktop or partner clients.
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script>
+/* ============================================================
+   Tab navigation
+============================================================ */
+const tabs = document.getElementById('tabs');
+tabs.addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const id = btn.dataset.tab;
+  document.querySelectorAll('section[data-section]').forEach(s => s.classList.add('hidden'));
+  document.querySelector(`section[data-section="${id}"]`).classList.remove('hidden');
+});
+
+/* ============================================================
+   Mock AG-UI event helpers
+============================================================ */
+function nowTs() {
+  const d = new Date();
+  return d.toTimeString().slice(0,8) + '.' + String(d.getMilliseconds()).padStart(3,'0');
+}
+function logEvent(logId, kind, type, payload, src) {
+  const log = document.getElementById(logId);
+  const ev = document.createElement('div');
+  ev.className = 'ev ' + kind;
+  const srcTag = src ? `<span class="src ${src==='copilot'?'cp':'a2'}">${src==='copilot'?'CP':'A2'}</span>` : '';
+  ev.innerHTML = `<span class="ts">${nowTs()}</span> ${srcTag}<span class="ty">${type}</span> <span style="color:#cbd5e1">${payload||''}</span>`;
+  log.appendChild(ev);
+  log.scrollTop = log.scrollHeight;
+}
+function clearLog(logId) {
+  const log = document.getElementById(logId);
+  // keep header
+  [...log.querySelectorAll('.ev')].forEach(n => n.remove());
+}
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+function appendMsg(containerId, role, html) {
+  const el = document.createElement('div');
+  el.className = 'msg ' + role;
+  if (role === 'bot') el.innerHTML = `<span class="role">Agent</span>${html}`;
+  else el.innerHTML = html;
+  document.getElementById(containerId).appendChild(el);
+}
+
+/* ============================================================
+   1. SHOP scenario
+============================================================ */
+const shopProducts = [
+  { id:'m1', name:'Acme U28 4K IPS', price:449, hz:60, panel:'IPS' },
+  { id:'m2', name:'Lyra UltraView 27', price:399, hz:75, panel:'IPS' },
+  { id:'m3', name:'Nova Pro 28 4K', price:489, hz:60, panel:'VA' },
+  { id:'m4', name:'Orbit 4K Studio', price:469, hz:60, panel:'IPS' }
+];
+function resetShop() {
+  document.getElementById('shop-cp-chat').innerHTML = '';
+  document.getElementById('shop-a2-chat').innerHTML = '';
+  clearLog('shop-log');
+}
+async function runShop() {
+  resetShop();
+  appendMsg('shop-cp-chat', 'user', 'Find me a 4K monitor under $500');
+  appendMsg('shop-a2-chat', 'user', 'Find me a 4K monitor under $500');
+  logEvent('shop-log', 'text', 'TEXT_MESSAGE_START', 'role=user');
+  await delay(300);
+  logEvent('shop-log', 'tool', 'TOOL_CALL_START', 'searchProducts({maxPrice:500, resolution:"4K"})');
+  await delay(500);
+  logEvent('shop-log', 'tool', 'TOOL_CALL_END', `→ ${shopProducts.length} results (Zod validated)`);
+  await delay(200);
+
+  // CopilotKit pane: typed React widget rendered for tool result
+  logEvent('shop-log', 'gen', 'GEN_UI', 'component=ProductGrid (typed React, props=Product[])', 'copilot');
+  appendMsg('shop-cp-chat', 'bot',
+    `Found ${shopProducts.length} matches. Here are the top picks:` + renderProductGrid(shopProducts, 'cp'));
+
+  await delay(200);
+  // A2UI pane: declarative tree
+  logEvent('shop-log', 'gen', 'GEN_UI', 'tree={ ProductGrid id=g1, itemsRef:/state/results }', 'a2ui');
+  appendMsg('shop-a2-chat', 'bot',
+    `Found ${shopProducts.length} matches. Catalog resolved <code>ProductGrid</code> → React adapter.` + renderProductGrid(shopProducts, 'a2'));
+}
+function renderProductGrid(items, ns) {
+  return `<div class="grid">${items.map(p => `
+    <div class="product">
+      <span class="px">${p.panel} · ${p.hz}Hz</span>
+      <span class="pn">${p.name}</span>
+      <span class="pp">$${p.price}</span>
+      <button class="btn ghost" onclick="addToCart('${ns}','${p.id}')">Add to cart</button>
+    </div>`).join('')}</div>`;
+}
+function addToCart(ns, id) {
+  const p = shopProducts.find(x => x.id === id);
+  const log = 'shop-log';
+  if (ns === 'cp') {
+    logEvent(log, 'tool', 'TOOL_CALL', `addToCart({id:"${id}"}) ← frontend tool`, 'copilot');
+  } else {
+    logEvent(log, 'state', 'STATE_PATCH', `add /state/cart/-  = "${id}"`, 'a2ui');
+  }
+  alert(`Added "${p.name}" to cart (${ns === 'cp' ? 'CopilotKit' : 'A2UI'} pane)`);
+}
+async function runShopCompare() {
+  const top3 = shopProducts.slice(0,3);
+  logEvent('shop-log', 'tool', 'TOOL_CALL', 'enterCompareCanvas(ids=[m1,m2,m3])');
+  await delay(200);
+  logEvent('shop-log', 'state', 'STATE_PATCH', '/canvas/mode = "compare"');
+  await delay(200);
+  // CopilotKit: render React CompareTable
+  logEvent('shop-log', 'gen', 'GEN_UI', 'component=CompareTable (React)', 'copilot');
+  appendMsg('shop-cp-chat', 'bot', 'Compare canvas opened:' + renderCompareTable(top3));
+  await delay(150);
+  logEvent('shop-log', 'gen', 'GEN_UI', 'tree={ CompareTable id=t1, rowsRef:/state/compare }', 'a2ui');
+  appendMsg('shop-a2-chat', 'bot', 'Compare canvas opened (catalog → CompareTable):' + renderCompareTable(top3));
+}
+function renderCompareTable(items) {
+  return `<table class="compare">
+    <thead><tr><th>Model</th><th>Price</th><th>Refresh</th><th>Panel</th></tr></thead>
+    <tbody>${items.map(p => `<tr><td>${p.name}</td><td>$${p.price}</td><td>${p.hz}Hz</td><td>${p.panel}</td></tr>`).join('')}</tbody>
+  </table>`;
+}
+
+/* ============================================================
+   2. CONFIGURE scenario
+============================================================ */
+const cfgState = {
+  chassis: 'X14',
+  ramOptions: [16, 32, 64],
+  ram: 16,
+  storage: 512,
+  storageOptions: [256, 512, 1024, 2048],
+  price: 1299,
+  step: 1
+};
+const chassisRules = {
+  'X14': { ramOptions:[16, 32], priceBase: 1199 },
+  'X16': { ramOptions:[32, 64], priceBase: 1599 },
+  'P14': { ramOptions:[16, 32, 64], priceBase: 1899 }
+};
+function calcPrice() {
+  const base = chassisRules[cfgState.chassis].priceBase;
+  return base + (cfgState.ram - 16) * 25 + (cfgState.storage - 512);
+}
+function resetConfigure() {
+  Object.assign(cfgState, { chassis:'X14', ramOptions:[16,32], ram:16, storage:512, price:1199, step:1 });
+  document.getElementById('cfg-cp').innerHTML = '';
+  document.getElementById('cfg-a2').innerHTML = '';
+  clearLog('cfg-log');
+}
+function runConfigure() {
+  resetConfigure();
+  cfgState.ramOptions = chassisRules[cfgState.chassis].ramOptions;
+  cfgState.price = calcPrice();
+  logEvent('cfg-log', 'gen', 'GEN_UI', 'initial canvas tree (Stepper + Form + PriceCard)');
+  logEvent('cfg-log', 'state', 'STATE_PATCH', `/cfg = ${JSON.stringify({chassis:cfgState.chassis,ram:cfgState.ram,price:cfgState.price})}`);
+  renderCfg('cp');
+  renderCfg('a2');
+}
+function renderCfg(ns) {
+  const elId = ns === 'cp' ? 'cfg-cp' : 'cfg-a2';
+  const root = document.getElementById(elId);
+  const stepperHtml = `<div class="stepper">
+    ${[1,2,3].map(s => `<div class="step ${s===cfgState.step?'active':''}">${['Chassis','Memory & Storage','Review'][s-1]}</div>`).join('')}
+  </div>`;
+  let body = '';
+  if (cfgState.step === 1) {
+    body = `<div class="form-row">
+      <label>Chassis</label>
+      <select onchange="cfgChange('chassis', this.value, '${ns}')">
+        ${Object.keys(chassisRules).map(c => `<option ${c===cfgState.chassis?'selected':''}>${c}</option>`).join('')}
+      </select>
+    </div>
+    <button class="btn" onclick="cfgStep(2,'${ns}')">Next →</button>`;
+  } else if (cfgState.step === 2) {
+    body = `<div class="form-row">
+      <label>RAM (GB)</label>
+      <select onchange="cfgChange('ram', +this.value, '${ns}')">
+        ${cfgState.ramOptions.map(o => `<option ${o===cfgState.ram?'selected':''}>${o}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Storage (GB)</label>
+      <select onchange="cfgChange('storage', +this.value, '${ns}')">
+        ${cfgState.storageOptions.map(o => `<option ${o===cfgState.storage?'selected':''}>${o}</option>`).join('')}
+      </select>
+    </div>
+    <button class="btn muted" onclick="cfgStep(1,'${ns}')">← Back</button>
+    <button class="btn" onclick="cfgStep(3,'${ns}')">Review →</button>`;
+  } else {
+    body = `<dl class="kv">
+      <dt>Chassis</dt><dd>${cfgState.chassis}</dd>
+      <dt>RAM</dt><dd>${cfgState.ram} GB</dd>
+      <dt>Storage</dt><dd>${cfgState.storage} GB</dd>
+    </dl>
+    <button class="btn muted" onclick="cfgStep(2,'${ns}')">← Back</button>
+    <button class="btn" onclick="configBuy()">Buy →</button>`;
+  }
+  root.innerHTML = stepperHtml + body + `
+    <div class="price-card">
+      <span class="lbl">Total · ${ns==='cp'?'CoAgent state':'/cfg/price binding'}</span>
+      <span class="val">$${cfgState.price.toLocaleString()}</span>
+    </div>`;
+}
+function cfgChange(field, value, src) {
+  cfgState[field] = value;
+  if (field === 'chassis') {
+    cfgState.ramOptions = chassisRules[value].ramOptions;
+    if (!cfgState.ramOptions.includes(cfgState.ram)) cfgState.ram = cfgState.ramOptions[0];
+  }
+  cfgState.price = calcPrice();
+  if (src === 'cp') {
+    logEvent('cfg-log', 'state', 'STATE_PATCH', `/cfg/${field} = ${JSON.stringify(value)} (CoAgent setState)`, 'copilot');
+    if (field === 'chassis') logEvent('cfg-log', 'state', 'STATE_PATCH', `/cfg/ramOptions ← agent recompute`, 'copilot');
+    logEvent('cfg-log', 'state', 'STATE_PATCH', `/cfg/price = ${cfgState.price}`, 'copilot');
+  } else {
+    logEvent('cfg-log', 'state', 'STATE_PATCH', `op=replace path=/cfg/${field} value=${JSON.stringify(value)}`, 'a2ui');
+    if (field === 'chassis') logEvent('cfg-log', 'state', 'STATE_PATCH', `op=replace path=/cfg/ramOptions`, 'a2ui');
+    logEvent('cfg-log', 'state', 'STATE_PATCH', `op=replace path=/cfg/price value=${cfgState.price}`, 'a2ui');
+  }
+  // both panes mirror the same shared state
+  renderCfg('cp'); renderCfg('a2');
+}
+function cfgStep(s, src) {
+  cfgState.step = s;
+  logEvent('cfg-log', 'state', 'STATE_PATCH', `/cfg/step = ${s}`, src==='cp'?'copilot':'a2ui');
+  renderCfg('cp'); renderCfg('a2');
+}
+function configBuy() {
+  if (!document.getElementById('cfg-cp').innerHTML) return alert('Initialize the canvas first.');
+  logEvent('cfg-log', 'intr', 'INTERRUPT', `placeOrder($${cfgState.price}) — awaiting human approval`);
+  // CopilotKit: useCopilotInterrupt
+  appendCfgHITL('cfg-cp', 'cp');
+  appendCfgHITL('cfg-a2', 'a2');
+}
+function appendCfgHITL(elId, ns) {
+  const root = document.getElementById(elId);
+  const dlg = document.createElement('div');
+  dlg.className = 'hitl';
+  dlg.innerHTML = `
+    <div class="h">⚠ Confirm purchase — $${cfgState.price.toLocaleString()}</div>
+    <div>${ns==='cp'?'<code>useCopilotInterrupt</code> rendered ConfirmDialog':'A2UI emitted ConfirmDialog node into the tree'}</div>
+    <div class="actions">
+      <button class="btn warn" onclick="cfgResume('${ns}', true, this)">Approve</button>
+      <button class="btn muted" onclick="cfgResume('${ns}', false, this)">Cancel</button>
+    </div>`;
+  root.appendChild(dlg);
+}
+function cfgResume(ns, approved, btn) {
+  logEvent('cfg-log', 'intr', 'RESUME', `approved=${approved}`, ns==='cp'?'copilot':'a2ui');
+  if (approved) logEvent('cfg-log', 'tool', 'TOOL_CALL', `placeOrder() → orderId=ORD-${Math.floor(Math.random()*9000+1000)}`);
+  btn.closest('.hitl').remove();
+  if (approved) {
+    const root = btn.closest('.panel-body');
+    const ok = document.createElement('div');
+    ok.style.marginTop='8px';
+    ok.innerHTML = `<span class="pill ok">Order placed</span>`;
+    root.appendChild(ok);
+  }
+}
+
+/* ============================================================
+   3. SUPPORT scenario
+============================================================ */
+function resetSupport() {
+  document.getElementById('sup-cp').innerHTML = '';
+  document.getElementById('sup-a2').innerHTML = '';
+  clearLog('sup-log');
+}
+async function runSupport() {
+  resetSupport();
+  appendMsg('sup-cp', 'user', "I want a refund for order #4421");
+  appendMsg('sup-a2', 'user', "I want a refund for order #4421");
+  logEvent('sup-log', 'text', 'TEXT_MESSAGE', 'role=user');
+  await delay(300);
+  logEvent('sup-log', 'handoff', 'HANDOFF', 'router → refund_specialist');
+  appendMsg('sup-cp', 'bot', '<i>Routing to billing specialist…</i>');
+  appendMsg('sup-a2', 'bot', '<i>Routing to billing specialist…</i>');
+  await delay(400);
+  logEvent('sup-log', 'tool', 'TOOL_CALL', 'lookupOrder(#4421) → total=$149');
+  await delay(300);
+  appendMsg('sup-cp', 'bot', 'Order #4421 — Wireless Headphones — <b>$149</b>. Refund &gt;$100 needs human approval.');
+  appendMsg('sup-a2', 'bot', 'Order #4421 — Wireless Headphones — <b>$149</b>. Refund &gt;$100 needs human approval.');
+  await delay(200);
+  logEvent('sup-log', 'intr', 'INTERRUPT', 'approveRefund({orderId:"4421", amount:149})');
+
+  // CopilotKit: useCopilotInterrupt rendered hook
+  document.getElementById('sup-cp').insertAdjacentHTML('beforeend', `
+    <div class="hitl">
+      <div class="h">⚠ Approval required · CopilotKit interrupt hook</div>
+      <div>Refund $149 to original payment method ending 4242</div>
+      <div class="actions">
+        <button class="btn warn" onclick="supResume('cp',true,this)">Approve</button>
+        <button class="btn muted" onclick="supResume('cp',false,this)">Deny</button>
+        <button class="btn ghost" onclick="supEscalate('cp')">Escalate to human</button>
+      </div>
+    </div>`);
+  // A2UI: ConfirmDialog node
+  document.getElementById('sup-a2').insertAdjacentHTML('beforeend', `
+    <div class="hitl">
+      <div class="h">⚠ ConfirmDialog (id=dlg1) · A2UI catalog component</div>
+      <div>Refund $149 to original payment method ending 4242</div>
+      <div class="actions">
+        <button class="btn warn" onclick="supResume('a2',true,this)">Approve</button>
+        <button class="btn muted" onclick="supResume('a2',false,this)">Deny</button>
+        <button class="btn ghost" onclick="supEscalate('a2')">Escalate to human</button>
+      </div>
+    </div>`);
+}
+function supResume(ns, approved, btn) {
+  logEvent('sup-log', 'intr', 'RESUME', `approved=${approved}`, ns==='cp'?'copilot':'a2ui');
+  if (approved) logEvent('sup-log', 'tool', 'TOOL_CALL', 'issueRefund(orderId="4421", amount=149)');
+  btn.closest('.hitl').remove();
+  appendMsg(ns==='cp'?'sup-cp':'sup-a2', 'bot',
+    approved ? '<span class="pill ok">Refund issued</span> A confirmation has been emailed to you.'
+             : '<span class="pill warn">Refund denied</span> A specialist will follow up.');
+}
+function supEscalate(ns) {
+  logEvent('sup-log', 'handoff', 'STEERING', 'live human agent took control of thread', ns==='cp'?'copilot':'a2ui');
+  appendMsg(ns==='cp'?'sup-cp':'sup-a2', 'bot', '<span class="pill info">Human agent</span> Hi, this is Maya from support — I\'ll take it from here.');
+}
+
+/* ============================================================
+   4. ACCOUNT scenario (PII whitelist)
+============================================================ */
+const acctOrders = [
+  { id:'4421', total:'$149', card:'•••• 4242', status:'Delivered' },
+  { id:'4318', total:'$ 89', card:'•••• 4242', status:'Shipped' },
+  { id:'4202', total:'$329', card:'•••• 0007', status:'Returned' }
+];
+function resetAccount() {
+  document.getElementById('acct-cp').innerHTML = '';
+  document.getElementById('acct-a2').innerHTML = '';
+  clearLog('acct-log');
+}
+async function runAccount() {
+  resetAccount();
+  logEvent('acct-log', 'tool', 'TOOL_CALL', 'showOrders() → server-redacted rows (PII never crosses agent)');
+  await delay(300);
+  logEvent('acct-log', 'gen', 'GEN_UI', 'OrdersTable (whitelisted)', 'copilot');
+  logEvent('acct-log', 'gen', 'GEN_UI', 'tree={ OrdersTable id=t1 } (catalog OK)', 'a2ui');
+  document.getElementById('acct-cp').innerHTML = renderAcct('CopilotKit · pre-registered action only');
+  document.getElementById('acct-a2').innerHTML = renderAcct('A2UI · catalog whitelist');
+}
+function renderAcct(label) {
+  return `<div style="font-size:11px;color:var(--muted);margin-bottom:8px">${label}</div>` +
+    acctOrders.map(o => `
+      <div class="acct-row">
+        <span><b>#${o.id}</b> · ${o.total}</span>
+        <span class="pii">${o.card}</span>
+        <span class="pill ${o.status==='Returned'?'warn':'ok'}">${o.status}</span>
+        <button class="btn ghost">Details</button>
+      </div>`).join('');
+}
+async function runAccountAttack() {
+  if (!document.getElementById('acct-cp').innerHTML) await runAccount();
+  await delay(200);
+  logEvent('acct-log', 'gen', 'GEN_UI', 'attempt: RawCardDisplay(card="4242 4242 4242 4242") ← MALICIOUS', 'copilot');
+  await delay(150);
+  // CopilotKit: no useCopilotAction registered for "RawCardDisplay" → silently dropped
+  document.getElementById('acct-cp').insertAdjacentHTML('beforeend',
+    `<div style="margin-top:10px;padding:10px;border:1px dashed var(--danger);border-radius:6px;background:#fef2f2;color:var(--danger);font-size:12px">
+      <b>Blocked.</b> No <code>useCopilotAction</code> registered for <code>RawCardDisplay</code>. Frame discarded — agent cannot inject arbitrary React.
+     </div>`);
+  logEvent('acct-log', 'gen', 'COMPONENT_REJECTED', 'RawCardDisplay not registered (CopilotKit allowlist)', 'copilot');
+
+  await delay(150);
+  document.getElementById('acct-a2').insertAdjacentHTML('beforeend',
+    `<div style="margin-top:10px;padding:10px;border:1px dashed var(--danger);border-radius:6px;background:#fef2f2;color:var(--danger);font-size:12px">
+      <b>Blocked.</b> A2UI catalog has no entry for <code>RawCardDisplay</code>. Per spec, agents may <i>request</i> but never <i>define</i> components. Frame dropped at the renderer.
+     </div>`);
+  logEvent('acct-log', 'gen', 'COMPONENT_REJECTED', 'RawCardDisplay not in catalog (A2UI spec)', 'a2ui');
+}
+
+/* ============================================================
+   5. ROUTER scenario
+============================================================ */
+function resetRouter() {
+  document.getElementById('router-cp').innerHTML = '';
+  document.getElementById('router-a2').innerHTML = '';
+  document.getElementById('router-cp-graph').innerHTML = renderRouterGraph(null);
+  document.getElementById('router-a2-graph').innerHTML = renderRouterGraph(null);
+  clearLog('router-log');
+}
+function renderRouterGraph(active) {
+  const nodes = ['Router', 'Shop', 'Configure', 'Support', 'Account'];
+  return nodes.map(n => `<span class="node ${active===n?'active':''}">${n}</span>`).join('');
+}
+async function runRouter(domain) {
+  if (!document.getElementById('router-cp-graph').innerHTML) resetRouter();
+  const map = {
+    shop:    { msg:"Find me a 4K monitor", agent:'Shop',     thinking:'classify_intent → "shop"',     reply:'Searching catalog for 4K monitors under $500…' },
+    config:  { msg:"Configure a laptop",   agent:'Configure',thinking:'classify_intent → "configure"', reply:'Opening Configure canvas. Let\'s start with chassis.' },
+    support: { msg:"Cancel my last order", agent:'Support',  thinking:'classify_intent → "support"',  reply:'Pulling order history. Looks like #4421 is your last order.' }
+  };
+  const c = map[domain];
+  appendMsg('router-cp', 'user', c.msg);
+  appendMsg('router-a2', 'user', c.msg);
+  logEvent('router-log', 'text', 'TEXT_MESSAGE', `role=user "${c.msg}"`);
+  document.getElementById('router-cp-graph').innerHTML = renderRouterGraph('Router');
+  document.getElementById('router-a2-graph').innerHTML = renderRouterGraph('Router');
+  await delay(300);
+  logEvent('router-log', 'state', 'THINKING_STEP', c.thinking);
+  await delay(300);
+  logEvent('router-log', 'handoff', 'HANDOFF', `router → ${c.agent.toLowerCase()}_agent`);
+  document.getElementById('router-cp-graph').innerHTML = renderRouterGraph(c.agent);
+  document.getElementById('router-a2-graph').innerHTML = renderRouterGraph(c.agent);
+  await delay(200);
+  logEvent('router-log', 'state', 'STATE_PATCH', `/active_agent = "${c.agent.toLowerCase()}"`);
+  appendMsg('router-cp', 'bot', `<span class="pill info">${c.agent} agent</span> ${c.reply}`);
+  appendMsg('router-a2', 'bot', `<span class="pill info">${c.agent} agent</span> ${c.reply}`);
+}
+
+/* Initialize router graph on first view */
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('router-cp-graph').innerHTML = renderRouterGraph(null);
+  document.getElementById('router-a2-graph').innerHTML = renderRouterGraph(null);
+});
+</script>
+</body>
+</html>
