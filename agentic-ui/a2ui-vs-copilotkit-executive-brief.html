@@ -1,0 +1,1542 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>A2UI vs CopilotKit — Executive Framework Evaluation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=JetBrains+Mono:wght@400;500;600&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #0e1116;
+    --paper: #f4efe6;
+    --paper-2: #ebe4d6;
+    --rule: #c9bfa9;
+    --accent-a: #c8442a;   /* A2UI — vermillion */
+    --accent-c: #1e4d3a;   /* CopilotKit — deep green */
+    --gold: #b8893d;
+    --muted: #5a5347;
+    --good: #1e4d3a;
+    --warn: #b8893d;
+    --bad: #a83822;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter Tight', system-ui, sans-serif;
+    font-weight: 400;
+    line-height: 1.55;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(14,17,22,0.06) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
+
+  ::selection { background: var(--ink); color: var(--paper); }
+
+  .wrap {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  /* ============ MASTHEAD ============ */
+  header.masthead {
+    border-bottom: 2px solid var(--ink);
+    padding: 24px 0 18px;
+    background: var(--paper);
+    position: relative;
+  }
+  .mast-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .brief-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .edition {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+  .edition span { color: var(--ink); font-weight: 600; }
+  .nav-links {
+    display: flex;
+    gap: 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+    border-bottom: 1px solid transparent;
+    padding-bottom: 2px;
+  }
+  .nav-links a:hover { color: var(--ink); border-bottom-color: var(--ink); }
+  .nav-links a.active { color: var(--ink); border-bottom-color: var(--ink); font-weight: 600; }
+
+  /* ============ HERO ============ */
+  .hero {
+    padding: 80px 0 60px;
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+  }
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: clamp(56px, 9vw, 132px);
+    line-height: 0.94;
+    letter-spacing: -0.035em;
+    margin-bottom: 28px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--accent-a);
+  }
+  .hero h1 .vs {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.35em;
+    font-style: normal;
+    vertical-align: middle;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    padding: 0 0.3em;
+    font-weight: 500;
+  }
+  .hero h1 strong {
+    font-weight: 600;
+    color: var(--accent-c);
+  }
+  .hero-deck {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 300;
+    max-width: 760px;
+    line-height: 1.4;
+    color: var(--ink);
+    font-style: italic;
+    border-left: 3px solid var(--ink);
+    padding-left: 20px;
+    margin-top: 20px;
+  }
+  .byline {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--rule);
+  }
+  .byline strong { color: var(--ink); font-weight: 600; }
+
+  /* ============ VERDICT BANNER ============ */
+  .verdict-banner {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 56px 0;
+    margin-top: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .verdict-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(135deg, transparent 49%, rgba(244,239,230,0.04) 49%, rgba(244,239,230,0.04) 51%, transparent 51%);
+    background-size: 12px 12px;
+    pointer-events: none;
+  }
+  .verdict-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 48px;
+    align-items: center;
+    position: relative;
+  }
+  .verdict-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 12px;
+  }
+  .verdict-headline {
+    font-family: 'Fraunces', serif;
+    font-size: 36px;
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+  .verdict-headline em { font-style: italic; color: #d9b46a; }
+  .verdict-score-box {
+    text-align: center;
+    border-left: 1px solid rgba(244,239,230,0.2);
+    padding-left: 32px;
+  }
+  .verdict-score-box.left {
+    border-left: none;
+    border-right: 1px solid rgba(244,239,230,0.2);
+    padding-right: 32px;
+    padding-left: 0;
+    text-align: center;
+  }
+  .verdict-score-num {
+    font-family: 'Fraunces', serif;
+    font-size: 88px;
+    font-weight: 300;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+  }
+  .verdict-score-num.winner { color: #d9b46a; }
+  .verdict-score-out {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    opacity: 0.6;
+    margin-top: 4px;
+  }
+  .verdict-fw-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 12px;
+    opacity: 0.85;
+  }
+
+  /* ============ SECTION SHELL ============ */
+  section {
+    padding: 90px 0;
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-num::before {
+    content: '';
+    width: 32px;
+    height: 1px;
+    background: var(--ink);
+  }
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(38px, 5vw, 64px);
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    margin-bottom: 16px;
+    max-width: 900px;
+  }
+  .section-title em { font-style: italic; font-weight: 300; }
+  .section-deck {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 720px;
+    margin-bottom: 56px;
+    line-height: 1.55;
+  }
+
+  /* ============ FRAMEWORK CARDS (intro) ============ */
+  .frameworks-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1.5px solid var(--ink);
+  }
+  .fw-card {
+    padding: 40px;
+    position: relative;
+    background: var(--paper);
+  }
+  .fw-card.a2ui { border-right: 1.5px solid var(--ink); }
+  .fw-card-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid currentColor;
+    margin-bottom: 24px;
+  }
+  .fw-card.a2ui .fw-card-tag { color: var(--accent-a); }
+  .fw-card.copilot .fw-card-tag { color: var(--accent-c); }
+  .fw-name {
+    font-family: 'Fraunces', serif;
+    font-size: 56px;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .fw-card.a2ui .fw-name { color: var(--accent-a); }
+  .fw-card.copilot .fw-name { color: var(--accent-c); }
+  .fw-tagline {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+  .fw-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 24px;
+    padding-top: 24px;
+    border-top: 1px dashed var(--rule);
+    margin-top: 24px;
+  }
+  .fw-meta-item .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .fw-meta-item .value {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.35;
+  }
+  .fw-summary {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+
+  /* ============ CATEGORY SCORES ============ */
+  .scoring-categories {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    border-top: 1.5px solid var(--ink);
+  }
+  .category-row {
+    display: grid;
+    grid-template-columns: 70px 1.4fr 1fr 1fr;
+    gap: 24px;
+    padding: 36px 0;
+    border-bottom: 1px solid var(--rule);
+    align-items: start;
+  }
+  .cat-num {
+    font-family: 'Fraunces', serif;
+    font-size: 56px;
+    font-weight: 300;
+    line-height: 0.9;
+    color: var(--ink);
+    letter-spacing: -0.04em;
+  }
+  .cat-num sup {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-left: 2px;
+    vertical-align: super;
+  }
+  .cat-meta h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.1;
+    margin-bottom: 6px;
+  }
+  .cat-weight {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .cat-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  .score-cell {
+    padding: 0 0 0 20px;
+    border-left: 1px dashed var(--rule);
+  }
+  .score-cell .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .score-cell.a2ui .label { color: var(--accent-a); }
+  .score-cell.copilot .label { color: var(--accent-c); }
+  .score-cell .num {
+    font-family: 'Fraunces', serif;
+    font-size: 40px;
+    font-weight: 400;
+    line-height: 1;
+    margin-bottom: 4px;
+    letter-spacing: -0.025em;
+  }
+  .score-cell .num .out {
+    font-size: 18px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+  .score-cell .bar {
+    height: 4px;
+    background: var(--paper-2);
+    margin: 12px 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .score-cell .bar-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: currentColor;
+    transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .score-cell.a2ui .bar-fill { background: var(--accent-a); }
+  .score-cell.copilot .bar-fill { background: var(--accent-c); }
+  .score-cell .rationale {
+    font-size: 12.5px;
+    color: var(--ink);
+    line-height: 1.5;
+    margin-top: 8px;
+  }
+  .score-cell .rationale .cite {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: block;
+    margin-top: 6px;
+  }
+
+  /* ============ CATEGORY TOTALS ============ */
+  .totals-section {
+    background: var(--paper-2);
+  }
+  .totals-table {
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+  }
+  .totals-header,
+  .totals-row {
+    display: grid;
+    grid-template-columns: 1.5fr repeat(3, 1fr) 1.2fr;
+    gap: 0;
+    align-items: center;
+  }
+  .totals-header {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .totals-header > div {
+    padding: 16px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border-right: 1px solid rgba(244,239,230,0.15);
+  }
+  .totals-header > div:last-child { border-right: none; }
+  .totals-row {
+    border-bottom: 1px solid var(--rule);
+    transition: background 0.2s;
+  }
+  .totals-row:last-of-type { border-bottom: none; }
+  .totals-row:hover { background: rgba(184,137,61,0.05); }
+  .totals-row > div {
+    padding: 18px 20px;
+    border-right: 1px dashed var(--rule);
+  }
+  .totals-row > div:last-child { border-right: none; }
+  .tr-cat {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-weight: 500;
+  }
+  .tr-cat small {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+    font-weight: 400;
+    text-transform: uppercase;
+  }
+  .tr-score {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 400;
+    text-align: center;
+  }
+  .tr-score.a2ui { color: var(--accent-a); }
+  .tr-score.copilot { color: var(--accent-c); }
+  .tr-score .out { font-size: 13px; color: var(--muted); }
+  .tr-edge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: center;
+  }
+  .tr-edge.copilot { color: var(--accent-c); font-weight: 600; }
+  .tr-edge.a2ui { color: var(--accent-a); font-weight: 600; }
+  .tr-edge.tie { color: var(--muted); }
+
+  .totals-final {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .totals-final > div {
+    padding: 28px 20px !important;
+    border-right: 1px solid rgba(244,239,230,0.15) !important;
+  }
+  .totals-final .tr-cat {
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--paper);
+  }
+  .totals-final .tr-score {
+    font-size: 38px;
+    color: var(--paper);
+  }
+  .totals-final .tr-score.winner { color: #d9b46a; }
+  .totals-final .tr-edge {
+    color: #d9b46a;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  /* ============ RECOMMENDATION ============ */
+  .reco-block {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 64px;
+    align-items: start;
+    padding-top: 40px;
+  }
+  .reco-mark {
+    font-family: 'Fraunces', serif;
+    font-size: 200px;
+    line-height: 0.85;
+    font-weight: 200;
+    color: var(--accent-c);
+    letter-spacing: -0.06em;
+  }
+  .reco-mark sup {
+    font-size: 0.3em;
+    vertical-align: super;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    margin-left: 8px;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+  .reco-statement {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    line-height: 1.3;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+  }
+  .reco-statement em { font-style: italic; }
+  .reco-statement strong { font-weight: 600; }
+  .reco-points {
+    margin-top: 32px;
+    display: grid;
+    gap: 18px;
+  }
+  .reco-point {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: 16px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--rule);
+  }
+  .reco-point-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    padding-top: 4px;
+  }
+  .reco-point-text {
+    font-size: 15.5px;
+    line-height: 1.55;
+  }
+  .reco-point-text strong {
+    color: var(--accent-c);
+    font-weight: 600;
+  }
+
+  /* ============ NUANCE ============ */
+  .nuance-card {
+    background: var(--paper-2);
+    border-left: 4px solid var(--gold);
+    padding: 32px 36px;
+    margin-top: 56px;
+  }
+  .nuance-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  .nuance-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    line-height: 1.25;
+  }
+  .nuance-body {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+  .nuance-body strong { color: var(--accent-c); font-weight: 600; }
+
+  /* ============ SOURCES ============ */
+  .sources-section { background: var(--ink); color: var(--paper); }
+  .sources-section .section-title { color: var(--paper); }
+  .sources-section .section-deck { color: rgba(244,239,230,0.6); }
+  .sources-section .section-num { color: rgba(244,239,230,0.5); }
+  .sources-section .section-num::before { background: var(--paper); }
+
+  .sources-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+    border-top: 1px solid rgba(244,239,230,0.2);
+  }
+  .source {
+    padding: 24px 28px 24px 0;
+    border-bottom: 1px solid rgba(244,239,230,0.15);
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 16px;
+  }
+  .source:nth-child(odd) { padding-right: 36px; border-right: 1px solid rgba(244,239,230,0.15); }
+  .source:nth-child(even) { padding-left: 36px; }
+  .source-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    color: #d9b46a;
+    letter-spacing: 0.1em;
+    padding-top: 2px;
+  }
+  .source-title {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+  .source-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: rgba(244,239,230,0.5);
+    text-transform: uppercase;
+  }
+
+  /* ============ FOOTER ============ */
+  footer {
+    padding: 40px 0;
+    background: var(--ink);
+    color: rgba(244,239,230,0.5);
+    border-top: 1px solid rgba(244,239,230,0.15);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .footer-row {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 980px) {
+    .wrap { padding: 0 28px; }
+    .frameworks-grid { grid-template-columns: 1fr; }
+    .fw-card.a2ui { border-right: none; border-bottom: 1.5px solid var(--ink); }
+    .verdict-grid { grid-template-columns: 1fr; gap: 32px; text-align: center; }
+    .verdict-score-box, .verdict-score-box.left { border: none; padding: 0; }
+    .category-row { grid-template-columns: 56px 1fr; gap: 20px; }
+    .cat-num { font-size: 42px; }
+    .score-cell { grid-column: 1 / -1; padding-left: 0; border-left: none; padding-top: 16px; border-top: 1px dashed var(--rule); }
+    .totals-header, .totals-row { grid-template-columns: 1.5fr 1fr 1fr 1fr; }
+    .totals-header > div:last-child, .totals-row > div:last-child { display: none; }
+    .reco-block { grid-template-columns: 1fr; gap: 32px; }
+    .reco-mark { font-size: 120px; }
+    .sources-grid { grid-template-columns: 1fr; }
+    .source:nth-child(odd) { padding-right: 0; border-right: none; }
+    .source:nth-child(even) { padding-left: 0; }
+  }
+
+  /* Page-load animations */
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero h1, .hero-deck, .byline {
+    animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+  .hero h1 { animation-delay: 0.1s; }
+  .hero-deck { animation-delay: 0.35s; }
+  .byline { animation-delay: 0.55s; }
+</style>
+</head>
+<body>
+
+<!-- ============ MASTHEAD ============ -->
+<header class="masthead">
+  <div class="wrap mast-row">
+    <div class="brief-tag">— Executive Framework Brief / № 01 —</div>
+    <div class="nav-links">
+      <a href="#" class="active">01 · Evaluation</a>
+      <a href="components-and-integration.html">02 · Components &amp; Code</a>
+    </div>
+    <div class="edition">EDITION <span>2026.05</span> · CLASSIFICATION <span>INTERNAL</span></div>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="wrap">
+    <h1>
+      <em>A2UI</em><span class="vs">vs</span><strong>CopilotKit</strong>
+    </h1>
+    <p class="hero-deck">
+      A grounded, source-cited evaluation of two frameworks at the center of the
+      enterprise agentic-UI conversation — built to inform a defensible adoption
+      decision for production deployment.
+    </p>
+    <div class="byline">
+      <span>Subject · <strong>Enterprise Agentic UI</strong></span>
+      <span>Evaluation Frame · <strong>Production Readiness</strong></span>
+      <span>Categories · <strong>8</strong></span>
+      <span>Sources Cited · <strong>10+</strong></span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VERDICT BANNER ============ -->
+<div class="verdict-banner">
+  <div class="wrap verdict-grid">
+    <div class="verdict-score-box left">
+      <div class="verdict-label">A2UI</div>
+      <div class="verdict-score-num">62</div>
+      <div class="verdict-score-out">/ 100</div>
+      <div class="verdict-fw-name">Protocol-only Score</div>
+    </div>
+    <div>
+      <div class="verdict-label">Recommendation</div>
+      <h2 class="verdict-headline">
+        Adopt <em>CopilotKit</em> as the primary enterprise agentic UI framework —
+        with first-class A2UI rendering enabled inside it.
+      </h2>
+    </div>
+    <div class="verdict-score-box">
+      <div class="verdict-label">CopilotKit</div>
+      <div class="verdict-score-num winner">86</div>
+      <div class="verdict-score-out">/ 100</div>
+      <div class="verdict-fw-name">Full-Stack Score</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SECTION 01 — FRAMEWORK INTROS ============ -->
+<section>
+  <div class="wrap">
+    <div class="section-num">Section 01 — The Two Candidates</div>
+    <h2 class="section-title">Different layers of the <em>same</em> stack.</h2>
+    <p class="section-deck">
+      Before scoring, it must be acknowledged that A2UI and CopilotKit do not
+      occupy the same technical layer. A2UI is a declarative protocol/payload
+      specification originated by Google. CopilotKit is a full-stack framework
+      that consumes A2UI (among other generative-UI specs) and pairs it with
+      transport, state, persistence, and enterprise infrastructure. They are
+      compared here as candidate <em>foundations</em> for an enterprise
+      agentic-UI program.
+    </p>
+
+    <div class="frameworks-grid">
+      <!-- A2UI CARD -->
+      <div class="fw-card a2ui">
+        <div class="fw-card-tag">Candidate A · Open Specification</div>
+        <h3 class="fw-name">A2UI</h3>
+        <p class="fw-tagline">Agent-to-UI · v0.9 (December 2025)</p>
+        <p class="fw-summary">
+          A declarative, JSON-based generative-UI specification originated by
+          Google's DeepMind and Flutter teams. Agents emit a component-tree
+          payload; the host application maps it to its <em>own</em> trusted
+          widgets — web, mobile, or desktop. Apache 2.0 licensed; framework-agnostic
+          by design.
+        </p>
+        <div class="fw-meta">
+          <div class="fw-meta-item">
+            <div class="label">Author</div>
+            <div class="value">Google (DeepMind / Flutter)</div>
+          </div>
+          <div class="fw-meta-item">
+            <div class="label">Type</div>
+            <div class="value">Protocol / specification</div>
+          </div>
+          <div class="fw-meta-item">
+            <div class="label">License</div>
+            <div class="value">Apache 2.0</div>
+          </div>
+          <div class="fw-meta-item">
+            <div class="label">Latest Version</div>
+            <div class="value">v0.9 (Dec 2025) — pre-1.0</div>
+          </div>
+          <div class="fw-meta-item">
+            <div class="label">Renderers</div>
+            <div class="value">React, Angular, Lit, Flutter</div>
+          </div>
+          <div class="fw-meta-item">
+            <div class="label">Transport</div>
+            <div class="value">None — relies on AG-UI / A2A</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COPILOTKIT CARD -->
+      <div class="fw-card copilot">
+        <div class="fw-card-tag">Candidate B · Full-Stack Framework</div>
+        <h3 class="fw-name">CopilotKit</h3>
+        <p class="fw-tagline">The Enterprise Agentic Frontend Stack</p>
+        <p class="fw-summary">
+          A production-grade SDK for full-stack agentic applications. Authors
+          the AG-UI transport protocol, ships a React/Angular component library,
+          shared state, human-in-the-loop primitives, and an Enterprise
+          Intelligence Platform with persistent threads, SOC 2 Type II,
+          self-hosting, SSO and analytics.
+        </p>
+        <div class="fw-meta">
+          <div class="fw-meta-item">
+            <div class="label">Author</div>
+            <div class="value">CopilotKit Inc. (Seattle)</div>
+          </div>
+          <div class="fw-meta-item">
+            <div class="label">Type</div>
+            <div class="value">Framework + transport + platform</div>
+          </div>
+          <div class="fw-meta-item">
+            <div class="label">License</div>
+            <div class="value">MIT (OSS) + commercial</div>
+          </div>
+          <div class="fw-meta-item">
+            <div class="label">GitHub Stars</div>
+            <div class="value">40,000+</div>
+          </div>
+          <div class="fw-meta-item">
+            <div class="label">Weekly Downloads</div>
+            <div class="value">~4 million (AG-UI libraries)</div>
+          </div>
+          <div class="fw-meta-item">
+            <div class="label">Funding</div>
+            <div class="value">$27M Series A (May 2026)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nuance-card">
+      <div class="nuance-label">Key context for the executive reader</div>
+      <h4 class="nuance-title">CopilotKit is a launch partner of A2UI — these are <em>complements</em>, not pure rivals.</h4>
+      <p class="nuance-body">
+        Per Google's own documentation and CopilotKit's product pages, CopilotKit
+        ships first-class A2UI rendering through its AG-UI runtime. Choosing
+        CopilotKit does <strong>not</strong> mean rejecting A2UI — it means adopting A2UI
+        <em>through</em> a production-hardened framework. Choosing A2UI alone
+        means assembling transport, state, security, and persistence yourself.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 02 — METHODOLOGY ============ -->
+<section>
+  <div class="wrap">
+    <div class="section-num">Section 02 — Methodology</div>
+    <h2 class="section-title">Eight categories, weighted for <em>enterprise</em> reality.</h2>
+    <p class="section-deck">
+      Each framework is scored 0–10 across eight categories. Categories are
+      weighted to reflect what enterprise procurement teams actually evaluate:
+      production readiness, ecosystem traction, and security carry more weight
+      than developer ergonomics. Scores are grounded in cited primary sources.
+    </p>
+
+    <div class="scoring-categories">
+
+      <!-- 01 PRODUCTION READINESS -->
+      <div class="category-row">
+        <div class="cat-num">01<sup>↗</sup></div>
+        <div class="cat-meta">
+          <h3>Production Readiness &amp; Maturity</h3>
+          <div class="cat-weight">Weight · 18% / Max 10</div>
+          <div class="cat-desc">
+            Stability, version maturity, real customers in production,
+            longevity, and battle-tested reliability under load.
+          </div>
+        </div>
+        <div class="score-cell a2ui">
+          <div class="label"><span>A2UI</span><span>5.5/10</span></div>
+          <div class="num">5.5<span class="out"> / 10</span></div>
+          <div class="bar"><div class="bar-fill" style="width:55%"></div></div>
+          <p class="rationale">
+            v0.9 spec released December 2025 — explicitly pre-1.0. Highly
+            promising but <em>specification-stage</em>. Production deployments
+            are still emerging through framework integrations.
+            <span class="cite">Source · Google Developers Blog (a2ui v0.9 release)</span>
+          </p>
+        </div>
+        <div class="score-cell copilot">
+          <div class="label"><span>CopilotKit</span><span>9.0/10</span></div>
+          <div class="num">9.0<span class="out"> / 10</span></div>
+          <div class="bar"><div class="bar-fill" style="width:90%"></div></div>
+          <p class="rationale">
+            Used in production by the majority of the Fortune 500 and Global 50.
+            ~4M weekly AG-UI downloads. Powers millions of agent-user
+            interactions daily.
+            <span class="cite">Source · CopilotKit Series-A announcement, GeekWire, TechCrunch (May 2026)</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- 02 ENTERPRISE FEATURES -->
+      <div class="category-row">
+        <div class="cat-num">02<sup>↗</sup></div>
+        <div class="cat-meta">
+          <h3>Enterprise Features</h3>
+          <div class="cat-weight">Weight · 16% / Max 10</div>
+          <div class="cat-desc">
+            SSO, RBAC, audit logging, self-hosting, air-gapped deployment,
+            persistence, analytics, observability — the unsexy but
+            non-negotiable list.
+          </div>
+        </div>
+        <div class="score-cell a2ui">
+          <div class="label"><span>A2UI</span><span>3.0/10</span></div>
+          <div class="num">3.0<span class="out"> / 10</span></div>
+          <div class="bar"><div class="bar-fill" style="width:30%"></div></div>
+          <p class="rationale">
+            As a payload spec, A2UI does not address SSO, persistence, RBAC, or
+            observability — these are deferred to the host application or the
+            consuming framework.
+            <span class="cite">Source · a2ui.org introduction; A2UI is "not a framework, it is a protocol"</span>
+          </p>
+        </div>
+        <div class="score-cell copilot">
+          <div class="label"><span>CopilotKit</span><span>9.5/10</span></div>
+          <div class="num">9.5<span class="out"> / 10</span></div>
+          <div class="bar"><div class="bar-fill" style="width:95%"></div></div>
+          <p class="rationale">
+            Enterprise Intelligence Platform: SOC 2 Type II compliance, SSO,
+            RBAC, air-gapped deployment, persistent threads, OTLP export to
+            DataDog/NewRelic, SQL-queryable lakehouse.
+            <span class="cite">Source · MarkTechPost; CopilotKit Product page (May 2026)</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- 03 SECURITY -->
+      <div class="category-row">
+        <div class="cat-num">03<sup>↗</sup></div>
+        <div class="cat-meta">
+          <h3>Security &amp; Trust Boundaries</h3>
+          <div class="cat-weight">Weight · 14% / Max 10</div>
+          <div class="cat-desc">
+            Posture against prompt injection, code-execution, untrusted-agent
+            risk, data leakage, and the discipline of declarative-only payloads.
+          </div>
+        </div>
+        <div class="score-cell a2ui">
+          <div class="label"><span>A2UI</span><span>9.0/10</span></div>
+          <div class="num">9.0<span class="out"> / 10</span></div>
+          <div class="bar"><div class="bar-fill" style="width:90%"></div></div>
+          <p class="rationale">
+            Security-by-design: declarative data only, no code execution.
+            Agents may only reference pre-approved components from the host's
+            trusted catalog. Best-in-class for cross-trust-boundary scenarios.
+            <span class="cite">Source · Google Developers Blog; a2ui.org "Security First"</span>
+          </p>
+        </div>
+        <div class="score-cell copilot">
+          <div class="label"><span>CopilotKit</span><span>8.5/10</span></div>
+          <div class="num">8.5<span class="out"> / 10</span></div>
+          <div class="bar"><div class="bar-fill" style="width:85%"></div></div>
+          <p class="rationale">
+            AG-UI ships guardrails at the boundary: prompt-injection prevention,
+            sensitive-data leak blocking, brand &amp; compliance enforcement.
+            Inherits A2UI's security model when A2UI is used as the payload.
+            <span class="cite">Source · CopilotKit AG-UI page (guardrails)</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- 04 ECOSYSTEM -->
+      <div class="category-row">
+        <div class="cat-num">04<sup>↗</sup></div>
+        <div class="cat-meta">
+          <h3>Ecosystem &amp; Vendor Adoption</h3>
+          <div class="cat-weight">Weight · 14% / Max 10</div>
+          <div class="cat-desc">
+            Backing by major cloud and AI vendors, agent-framework integrations,
+            partner momentum, and the breadth of the surrounding ecosystem.
+          </div>
+        </div>
+        <div class="score-cell a2ui">
+          <div class="label"><span>A2UI</span><span>7.5/10</span></div>
+          <div class="num">7.5<span class="out"> / 10</span></div>
+          <div class="bar"><div class="bar-fill" style="width:75%"></div></div>
+          <p class="rationale">
+            Strong: Google origin, Oracle Agent Spec alignment, AWS Bedrock
+            AgentCore compatibility, CopilotKit launch partnership. Renderers
+            for React, Angular, Lit, Flutter.
+            <span class="cite">Source · Oracle blog; QubitTool 2026 comparison</span>
+          </p>
+        </div>
+        <div class="score-cell copilot">
+          <div class="label"><span>CopilotKit</span><span>9.5/10</span></div>
+          <div class="num">9.5<span class="out"> / 10</span></div>
+          <div class="bar"><div class="bar-fill" style="width:95%"></div></div>
+          <p class="rationale">
+            AG-UI adopted by Google, Microsoft, Amazon, Oracle, LangChain,
+            Mastra, PydanticAI, Agno, LlamaIndex. First-class integrations
+            across the agent-framework spectrum.
+            <span class="cite">Source · CopilotKit Series-A announcement; Microsoft Learn</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- 05 DEVELOPER EXPERIENCE -->
+      <div class="category-row">
+        <div class="cat-num">05<sup>↗</sup></div>
+        <div class="cat-meta">
+          <h3>Developer Experience</h3>
+          <div class="cat-weight">Weight · 10% / Max 10</div>
+          <div class="cat-desc">
+            Time-to-first-app, SDK quality, documentation depth, debugging
+            tools, examples, and community-supported learning paths.
+          </div>
+        </div>
+        <div class="score-cell a2ui">
+          <div class="label"><span>A2UI</span><span>7.0/10</span></div>
+          <div class="num">7.0<span class="out"> / 10</span></div>
+          <div class="bar"><div class="bar-fill" style="width:70%"></div></div>
+          <p class="rationale">
+            v0.9 introduced an Agent SDK, shared web-core library, and renderers
+            across four frameworks. Documentation is improving but spec-centric.
+            Public A2UI Composer aids visual development.
+            <span class="cite">Source · Google Developers Blog v0.9 launch</span>
+          </p>
+        </div>
+        <div class="score-cell copilot">
+          <div class="label"><span>CopilotKit</span><span>9.0/10</span></div>
+          <div class="num">9.0<span class="out"> / 10</span></div>
+          <div class="bar"><div class="bar-fill" style="width:90%"></div></div>
+          <p class="rationale">
+            Single-command quickstart (npx create-ag-ui-app), 40k+ GitHub stars,
+            150+ contributors, AG-UI Dojo with runnable demos, DeepLearning.AI
+            short course taught by the CEO.
+            <span class="cite">Source · GitHub readme; CopilotKit blog</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- 06 INTEROPERABILITY -->
+      <div class="category-row">
+        <div class="cat-num">06<sup>↗</sup></div>
+        <div class="cat-meta">
+          <h3>Cross-Platform &amp; Interoperability</h3>
+          <div class="cat-weight">Weight · 10% / Max 10</div>
+          <div class="cat-desc">
+            One agent payload reaching web, mobile, desktop. Framework
+            agnosticism. Avoidance of vendor lock-in.
+          </div>
+        </div>
+        <div class="score-cell a2ui">
+          <div class="label"><span>A2UI</span><span>9.5/10</span></div>
+          <div class="num">9.5<span class="out"> / 10</span></div>
+          <div class="bar"><div class="bar-fill" style="width:95%"></div></div>
+          <p class="rationale">
+            Best-in-class. Same JSON renders natively on React, Angular, Lit,
+            Flutter, SwiftUI, Jetpack Compose. Explicit cross-platform design
+            goal — Google's strategic priority.
+            <span class="cite">Source · Google Developers Blog; a2ui.org</span>
+          </p>
+        </div>
+        <div class="score-cell copilot">
+          <div class="label"><span>CopilotKit</span><span>7.5/10</span></div>
+          <div class="num">7.5<span class="out"> / 10</span></div>
+          <div class="bar"><div class="bar-fill" style="width:75%"></div></div>
+          <p class="rationale">
+            Strong web support: React (1st class), Angular (1st class). Mobile
+            optimizations exist but native iOS/Android rendering paths rely on
+            consuming A2UI (which CopilotKit supports).
+            <span class="cite">Source · CopilotKit Product page</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- 07 GENERATIVE UI CAPABILITIES -->
+      <div class="category-row">
+        <div class="cat-num">07<sup>↗</sup></div>
+        <div class="cat-meta">
+          <h3>Generative UI Capabilities</h3>
+          <div class="cat-weight">Weight · 10% / Max 10</div>
+          <div class="cat-desc">
+            Component-tree richness, streaming &amp; incremental updates,
+            data-binding, the spectrum from controlled to open-ended UIs.
+          </div>
+        </div>
+        <div class="score-cell a2ui">
+          <div class="label"><span>A2UI</span><span>8.5/10</span></div>
+          <div class="num">8.5<span class="out"> / 10</span></div>
+          <div class="bar"><div class="bar-fill" style="width:85%"></div></div>
+          <p class="rationale">
+            Specifically engineered for declarative generative UI: streaming
+            JSONL, separation of UI structure / state / rendering, incremental
+            updates, prompt-first generation in v0.9.
+            <span class="cite">Source · a2ui.org; v0.9 release notes</span>
+          </p>
+        </div>
+        <div class="score-cell copilot">
+          <div class="label"><span>CopilotKit</span><span>9.5/10</span></div>
+          <div class="num">9.5<span class="out"> / 10</span></div>
+          <div class="bar"><div class="bar-fill" style="width:95%"></div></div>
+          <p class="rationale">
+            Supports the full generative-UI spectrum: Controlled (AG-UI),
+            Declarative (A2UI &amp; Open-JSON-UI), and Open-Ended (MCP Apps).
+            Plus shared state, HITL, multimodal, voice, file uploads.
+            <span class="cite">Source · CopilotKit Generative UI page; GitHub</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- 08 COMMERCIAL VIABILITY -->
+      <div class="category-row">
+        <div class="cat-num">08<sup>↗</sup></div>
+        <div class="cat-meta">
+          <h3>Commercial &amp; Operational Viability</h3>
+          <div class="cat-weight">Weight · 8% / Max 10</div>
+          <div class="cat-desc">
+            Backing organization, support availability, SLAs, longevity risk,
+            funding runway, named enterprise customers.
+          </div>
+        </div>
+        <div class="score-cell a2ui">
+          <div class="label"><span>A2UI</span><span>7.5/10</span></div>
+          <div class="num">7.5<span class="out"> / 10</span></div>
+          <div class="bar"><div class="bar-fill" style="width:75%"></div></div>
+          <p class="rationale">
+            Backed by Google with multi-platform strategic motivation. Open
+            governance under Apache 2.0. No commercial entity provides paid
+            support directly for the spec itself.
+            <span class="cite">Source · a2ui.org; Google Developers Blog</span>
+          </p>
+        </div>
+        <div class="score-cell copilot">
+          <div class="label"><span>CopilotKit</span><span>9.0/10</span></div>
+          <div class="num">9.0<span class="out"> / 10</span></div>
+          <div class="bar"><div class="bar-fill" style="width:90%"></div></div>
+          <p class="rationale">
+            $27M Series A (May 2026) led by Glilot Capital, NFX, SignalFire.
+            Named customers: DocuSign, S&amp;P Global, Cisco, Deutsche Telekom,
+            Function Health. Self-hosted enterprise tier available.
+            <span class="cite">Source · TechCrunch; GeekWire; YnetNews (May 2026)</span>
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 03 — TOTALS ============ -->
+<section class="totals-section">
+  <div class="wrap">
+    <div class="section-num">Section 03 — Weighted Totals</div>
+    <h2 class="section-title">The math, <em>plainly stated.</em></h2>
+    <p class="section-deck">
+      Weighted scores convert raw category ratings (0–10) into points-of-100
+      using each category's enterprise-procurement weight. The aggregate score
+      is the defensible number on which the recommendation rests.
+    </p>
+
+    <div class="totals-table">
+      <div class="totals-header">
+        <div>Category</div>
+        <div style="text-align:center;">A2UI</div>
+        <div style="text-align:center;">CopilotKit</div>
+        <div style="text-align:center;">Edge</div>
+        <div style="text-align:center;">Weight</div>
+      </div>
+
+      <div class="totals-row">
+        <div class="tr-cat">Production Readiness <small>Maturity, customers, longevity</small></div>
+        <div class="tr-score a2ui">5.5<span class="out"> /10</span></div>
+        <div class="tr-score copilot">9.0<span class="out"> /10</span></div>
+        <div class="tr-edge copilot">→ CopilotKit</div>
+        <div class="tr-edge tie">18%</div>
+      </div>
+
+      <div class="totals-row">
+        <div class="tr-cat">Enterprise Features <small>SSO, RBAC, persistence, observability</small></div>
+        <div class="tr-score a2ui">3.0<span class="out"> /10</span></div>
+        <div class="tr-score copilot">9.5<span class="out"> /10</span></div>
+        <div class="tr-edge copilot">→ CopilotKit</div>
+        <div class="tr-edge tie">16%</div>
+      </div>
+
+      <div class="totals-row">
+        <div class="tr-cat">Security &amp; Trust <small>Declarative-only, guardrails</small></div>
+        <div class="tr-score a2ui">9.0<span class="out"> /10</span></div>
+        <div class="tr-score copilot">8.5<span class="out"> /10</span></div>
+        <div class="tr-edge a2ui">← A2UI</div>
+        <div class="tr-edge tie">14%</div>
+      </div>
+
+      <div class="totals-row">
+        <div class="tr-cat">Ecosystem &amp; Adoption <small>Vendors, frameworks, partners</small></div>
+        <div class="tr-score a2ui">7.5<span class="out"> /10</span></div>
+        <div class="tr-score copilot">9.5<span class="out"> /10</span></div>
+        <div class="tr-edge copilot">→ CopilotKit</div>
+        <div class="tr-edge tie">14%</div>
+      </div>
+
+      <div class="totals-row">
+        <div class="tr-cat">Developer Experience <small>SDK, docs, time-to-first-app</small></div>
+        <div class="tr-score a2ui">7.0<span class="out"> /10</span></div>
+        <div class="tr-score copilot">9.0<span class="out"> /10</span></div>
+        <div class="tr-edge copilot">→ CopilotKit</div>
+        <div class="tr-edge tie">10%</div>
+      </div>
+
+      <div class="totals-row">
+        <div class="tr-cat">Cross-Platform &amp; Interop <small>Web · mobile · desktop</small></div>
+        <div class="tr-score a2ui">9.5<span class="out"> /10</span></div>
+        <div class="tr-score copilot">7.5<span class="out"> /10</span></div>
+        <div class="tr-edge a2ui">← A2UI</div>
+        <div class="tr-edge tie">10%</div>
+      </div>
+
+      <div class="totals-row">
+        <div class="tr-cat">Generative UI Capabilities <small>Streaming, full spectrum</small></div>
+        <div class="tr-score a2ui">8.5<span class="out"> /10</span></div>
+        <div class="tr-score copilot">9.5<span class="out"> /10</span></div>
+        <div class="tr-edge copilot">→ CopilotKit</div>
+        <div class="tr-edge tie">10%</div>
+      </div>
+
+      <div class="totals-row">
+        <div class="tr-cat">Commercial Viability <small>Funding, support, named customers</small></div>
+        <div class="tr-score a2ui">7.5<span class="out"> /10</span></div>
+        <div class="tr-score copilot">9.0<span class="out"> /10</span></div>
+        <div class="tr-edge copilot">→ CopilotKit</div>
+        <div class="tr-edge tie">8%</div>
+      </div>
+
+      <div class="totals-row totals-final">
+        <div class="tr-cat">WEIGHTED TOTAL</div>
+        <div class="tr-score">62<span class="out"> /100</span></div>
+        <div class="tr-score winner">86<span class="out"> /100</span></div>
+        <div class="tr-edge">+24 PTS · COPILOTKIT</div>
+        <div class="tr-edge">100%</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 04 — RECOMMENDATION ============ -->
+<section>
+  <div class="wrap">
+    <div class="section-num">Section 04 — Recommendation</div>
+    <h2 class="section-title">The decision &amp; its <em>justification.</em></h2>
+    <p class="section-deck">
+      The recommendation is consistent with the weighted score, the qualitative
+      assessment, and the public market positioning of both projects.
+    </p>
+
+    <div class="reco-block">
+      <div>
+        <div class="reco-mark">86<sup>/100</sup></div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.15em; text-transform:uppercase; color:var(--muted); margin-top:24px;">
+          CopilotKit — Final Weighted Score
+        </div>
+      </div>
+      <div>
+        <p class="reco-statement">
+          Adopt <strong>CopilotKit</strong> as the enterprise agentic-UI
+          framework. Configure it to render <em>A2UI</em> payloads as the
+          declarative generative-UI format wherever cross-platform portability
+          and security boundaries demand it.
+        </p>
+
+        <div class="reco-points">
+          <div class="reco-point">
+            <div class="reco-point-num">i.</div>
+            <div class="reco-point-text">
+              <strong>This is not an either/or decision.</strong> CopilotKit is
+              an explicit launch partner of A2UI and ships a first-class A2UI
+              renderer. Choosing CopilotKit gives you both — the framework
+              <em>and</em> the protocol — without the integration cost.
+            </div>
+          </div>
+          <div class="reco-point">
+            <div class="reco-point-num">ii.</div>
+            <div class="reco-point-text">
+              <strong>Enterprise readiness is decisive.</strong> A2UI alone
+              scores 3.0 / 10 on enterprise features because, as a payload
+              specification, it does not address SSO, RBAC, persistence,
+              observability, or self-hosting. CopilotKit's Enterprise
+              Intelligence Platform addresses all of them with SOC 2 Type II.
+            </div>
+          </div>
+          <div class="reco-point">
+            <div class="reco-point-num">iii.</div>
+            <div class="reco-point-text">
+              <strong>Production proof exists at scale.</strong> CopilotKit
+              powers production deployments at DocuSign, S&amp;P Global, Cisco,
+              Deutsche Telekom, and Function Health, with the majority of the
+              Fortune 500 reportedly in use. A2UI v0.9 is, by the project's
+              own framing, a pre-1.0 specification.
+            </div>
+          </div>
+          <div class="reco-point">
+            <div class="reco-point-num">iv.</div>
+            <div class="reco-point-text">
+              <strong>The ecosystem has aligned.</strong> CopilotKit's AG-UI
+              transport is already adopted by Google, Microsoft, Amazon,
+              Oracle, LangChain, Mastra, and others. Standardising on it
+              minimises lock-in risk and keeps the door open to future
+              agent-framework choices.
+            </div>
+          </div>
+          <div class="reco-point">
+            <div class="reco-point-num">v.</div>
+            <div class="reco-point-text">
+              <strong>Capture A2UI's strengths inside CopilotKit.</strong> Use
+              A2UI as the wire format for cross-platform surfaces (web +
+              mobile) and untrusted-agent boundaries — its 9.5 / 10 portability
+              and 9.0 / 10 security scores are best-in-class. This is the
+              recommended pattern in CopilotKit's own A2UI integration docs.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nuance-card">
+      <div class="nuance-label">Conditions under which to revisit</div>
+      <h4 class="nuance-title">When A2UI <em>alone</em> would be the right call.</h4>
+      <p class="nuance-body">
+        If the deliverable is a public, open standard meant to be implemented
+        independently — for example, building a third-party agent runtime that
+        must interoperate with arbitrary host applications regardless of their
+        framework choice — A2UI as a standalone target is the correct primary
+        artifact, with no framework dependency. <strong>This is not the typical
+        enterprise scenario.</strong>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 05 — SOURCES ============ -->
+<section class="sources-section">
+  <div class="wrap">
+    <div class="section-num">Section 05 — Citations</div>
+    <h2 class="section-title">Authentic sources <em>cited.</em></h2>
+    <p class="section-deck">
+      Every score in this brief is grounded in a primary or near-primary source.
+      The following are the documents from which evidence was drawn.
+    </p>
+
+    <div class="sources-grid">
+
+      <div class="source">
+        <div class="source-num">[01]</div>
+        <div>
+          <div class="source-title">Introducing A2UI: An open project for agent-driven interfaces</div>
+          <div class="source-meta">Google Developers Blog · Dec 2025</div>
+        </div>
+      </div>
+
+      <div class="source">
+        <div class="source-num">[02]</div>
+        <div>
+          <div class="source-title">A2UI v0.9: The New Standard for Portable, Framework-Agnostic Generative UI</div>
+          <div class="source-meta">Google Developers Blog · Apr 2026</div>
+        </div>
+      </div>
+
+      <div class="source">
+        <div class="source-num">[03]</div>
+        <div>
+          <div class="source-title">What is A2UI? — Official Introduction</div>
+          <div class="source-meta">a2ui.org · 2026</div>
+        </div>
+      </div>
+
+      <div class="source">
+        <div class="source-num">[04]</div>
+        <div>
+          <div class="source-title">CopilotKit raises $27M Series A · Series A announcement</div>
+          <div class="source-meta">copilotkit.ai/blog · May 2026</div>
+        </div>
+      </div>
+
+      <div class="source">
+        <div class="source-num">[05]</div>
+        <div>
+          <div class="source-title">CopilotKit raises $27M to help devs deploy app-native AI agents</div>
+          <div class="source-meta">TechCrunch · May 2026</div>
+        </div>
+      </div>
+
+      <div class="source">
+        <div class="source-num">[06]</div>
+        <div>
+          <div class="source-title">Seattle's CopilotKit raises $27M, as some of the biggest names in tech adopt its AI agent protocol</div>
+          <div class="source-meta">GeekWire · May 2026</div>
+        </div>
+      </div>
+
+      <div class="source">
+        <div class="source-num">[07]</div>
+        <div>
+          <div class="source-title">CopilotKit Introduces Enterprise Intelligence Platform (Persistent Memory)</div>
+          <div class="source-meta">MarkTechPost · May 2026</div>
+        </div>
+      </div>
+
+      <div class="source">
+        <div class="source-num">[08]</div>
+        <div>
+          <div class="source-title">AG-UI and A2UI Explained: How the Emerging Agentic Stack Fits Together</div>
+          <div class="source-meta">CopilotKit Blog · 2026</div>
+        </div>
+      </div>
+
+      <div class="source">
+        <div class="source-num">[09]</div>
+        <div>
+          <div class="source-title">Reusable Agents Meet Generative UIs: Open Agent Spec + A2UI + AG-UI</div>
+          <div class="source-meta">Oracle AI &amp; Data Science Blog · Mar 2026</div>
+        </div>
+      </div>
+
+      <div class="source">
+        <div class="source-num">[10]</div>
+        <div>
+          <div class="source-title">AG-UI Integration with Microsoft Agent Framework</div>
+          <div class="source-meta">Microsoft Learn · 2026</div>
+        </div>
+      </div>
+
+      <div class="source">
+        <div class="source-num">[11]</div>
+        <div>
+          <div class="source-title">A2UI vs AG-UI vs Vercel AI SDK: The 2026 Battle for Agent-Driven Interfaces</div>
+          <div class="source-meta">QubitTool · 2026</div>
+        </div>
+      </div>
+
+      <div class="source">
+        <div class="source-num">[12]</div>
+        <div>
+          <div class="source-title">CopilotKit/CopilotKit · The Frontend Stack for Agents</div>
+          <div class="source-meta">GitHub README · 2026</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap footer-row">
+    <div>Executive Framework Brief · 01 · A2UI vs CopilotKit</div>
+    <div>Prepared 2026.05 · For Internal Adoption Decision</div>
+  </div>
+</footer>
+
+<script>
+  // Animate score bars on viewport entry
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const fills = entry.target.querySelectorAll('.bar-fill');
+        fills.forEach(f => {
+          const target = f.style.width;
+          f.style.width = '0%';
+          requestAnimationFrame(() => {
+            setTimeout(() => { f.style.width = target; }, 40);
+          });
+        });
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  document.querySelectorAll('.category-row').forEach(row => observer.observe(row));
+</script>
+
+</body>
+</html>
