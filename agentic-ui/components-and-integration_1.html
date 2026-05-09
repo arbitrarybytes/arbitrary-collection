@@ -1,0 +1,1513 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>A2UI vs CopilotKit — Components &amp; Integration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=JetBrains+Mono:wght@400;500;600;700&family=Inter+Tight:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* ============ DESIGN TOKENS (shared with brief) ============ */
+  :root {
+    --ink: #0e1116;
+    --paper: #f4efe6;
+    --paper-2: #ebe4d6;
+    --rule: #c9bfa9;
+    --accent-a: #c8442a;   /* A2UI — vermillion */
+    --accent-c: #1e4d3a;   /* CopilotKit — deep green */
+    --gold: #b8893d;
+    --muted: #5a5347;
+
+    /* Code panel tokens */
+    --code-bg: #0e1116;
+    --code-fg: #e8e2d2;
+    --code-comment: #7a7363;
+    --code-keyword: #d9b46a;
+    --code-string: #e09d6f;
+    --code-number: #b39c6c;
+    --code-prop: #c9bfa9;
+    --code-tag: #d9b46a;
+    --code-func: #e8c98a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter Tight', system-ui, sans-serif;
+    font-weight: 400;
+    line-height: 1.55;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(14,17,22,0.06) 1px, transparent 0);
+    background-size: 24px 24px;
+  }
+
+  ::selection { background: var(--ink); color: var(--paper); }
+
+  .wrap {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 0 48px;
+  }
+
+  /* ============ MASTHEAD ============ */
+  header.masthead {
+    border-bottom: 2px solid var(--ink);
+    padding: 24px 0 18px;
+    background: var(--paper);
+    position: relative;
+  }
+  .mast-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .brief-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .edition {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+  .edition span { color: var(--ink); font-weight: 600; }
+  .nav-links {
+    display: flex;
+    gap: 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+    border-bottom: 1px solid transparent;
+    padding-bottom: 2px;
+  }
+  .nav-links a:hover { color: var(--ink); border-bottom-color: var(--ink); }
+  .nav-links a.active { color: var(--ink); border-bottom-color: var(--ink); font-weight: 600; }
+
+  /* ============ HERO ============ */
+  .hero {
+    padding: 80px 0 60px;
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+  }
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: clamp(48px, 7.5vw, 108px);
+    line-height: 0.96;
+    letter-spacing: -0.035em;
+    margin-bottom: 28px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--gold);
+  }
+  .hero-deck {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 300;
+    max-width: 760px;
+    line-height: 1.4;
+    color: var(--ink);
+    font-style: italic;
+    border-left: 3px solid var(--ink);
+    padding-left: 20px;
+    margin-top: 20px;
+  }
+  .byline {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--rule);
+  }
+  .byline strong { color: var(--ink); font-weight: 600; }
+
+  /* ============ SECTION SHELL ============ */
+  section {
+    padding: 90px 0;
+    border-bottom: 1px solid var(--rule);
+    position: relative;
+  }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-num::before {
+    content: '';
+    width: 32px;
+    height: 1px;
+    background: var(--ink);
+  }
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(38px, 5vw, 64px);
+    font-weight: 400;
+    line-height: 1.02;
+    letter-spacing: -0.025em;
+    margin-bottom: 16px;
+    max-width: 900px;
+  }
+  .section-title em { font-style: italic; font-weight: 300; }
+  .section-deck {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 780px;
+    margin-bottom: 56px;
+    line-height: 1.55;
+  }
+
+  /* ============ COMPARISON HEADER (for side-by-side blocks) ============ */
+  .compare-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+    align-items: end;
+  }
+  .compare-col-head {
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .compare-col-head.a2ui { border-bottom-color: var(--accent-a); }
+  .compare-col-head.copilot { border-bottom-color: var(--accent-c); }
+  .compare-col-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid currentColor;
+    margin-bottom: 12px;
+  }
+  .compare-col-head.a2ui .compare-col-tag { color: var(--accent-a); }
+  .compare-col-head.copilot .compare-col-tag { color: var(--accent-c); }
+  .compare-col-name {
+    font-family: 'Fraunces', serif;
+    font-size: 38px;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .compare-col-head.a2ui .compare-col-name { color: var(--accent-a); }
+  .compare-col-head.copilot .compare-col-name { color: var(--accent-c); }
+  .compare-col-tagline {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--muted);
+  }
+
+  /* ============ COMPONENT CATALOG (side-by-side rows) ============ */
+  .catalog-section { background: var(--paper); }
+
+  .catalog-table {
+    border: 1.5px solid var(--ink);
+    background: var(--paper);
+  }
+  .catalog-row {
+    display: grid;
+    grid-template-columns: 220px 1fr 1fr;
+    border-bottom: 1px solid var(--rule);
+  }
+  .catalog-row:last-child { border-bottom: none; }
+  .catalog-head {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .catalog-head > div {
+    padding: 18px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    border-right: 1px solid rgba(244,239,230,0.18);
+  }
+  .catalog-head > div:last-child { border-right: none; }
+
+  .catalog-row > div {
+    padding: 24px;
+    border-right: 1px dashed var(--rule);
+  }
+  .catalog-row > div:last-child { border-right: none; }
+
+  .cat-cell-name {
+    background: var(--paper-2);
+  }
+  .cat-cell-name h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+    margin-bottom: 6px;
+  }
+  .cat-cell-name p {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+
+  .cat-cell-impl {
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .cat-cell-impl strong {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .cat-cell-impl.a2ui strong { color: var(--accent-a); }
+  .cat-cell-impl.copilot strong { color: var(--accent-c); }
+  .cat-cell-impl code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--paper-2);
+    padding: 1px 6px;
+    border-radius: 2px;
+    color: var(--ink);
+    border: 1px solid var(--rule);
+  }
+  .cat-cell-impl ul {
+    list-style: none;
+    margin-top: 8px;
+  }
+  .cat-cell-impl li {
+    padding-left: 16px;
+    position: relative;
+    margin-bottom: 4px;
+    font-size: 13px;
+  }
+  .cat-cell-impl li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--muted);
+  }
+
+  /* ============ CODE PANELS ============ */
+  .code-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  .code-panel {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    border: 1.5px solid var(--ink);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .code-header {
+    background: rgba(244,239,230,0.05);
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(244,239,230,0.12);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .code-header .filename {
+    color: var(--code-comment);
+  }
+  .code-header .filename b {
+    color: var(--code-fg);
+    font-weight: 600;
+  }
+  .code-header .lang-tag {
+    color: var(--gold);
+    font-weight: 600;
+    letter-spacing: 0.15em;
+  }
+  .code-traffic {
+    display: flex;
+    gap: 6px;
+    margin-right: 12px;
+  }
+  .code-traffic span {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: rgba(244,239,230,0.2);
+  }
+  .code-header-left {
+    display: flex;
+    align-items: center;
+  }
+  pre.code-body {
+    margin: 0;
+    padding: 22px 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    overflow-x: auto;
+    flex: 1;
+  }
+  pre.code-body::-webkit-scrollbar { height: 6px; }
+  pre.code-body::-webkit-scrollbar-track { background: rgba(244,239,230,0.05); }
+  pre.code-body::-webkit-scrollbar-thumb { background: rgba(244,239,230,0.2); }
+
+  /* Syntax highlighting tokens */
+  .tok-comment { color: var(--code-comment); font-style: italic; }
+  .tok-keyword { color: var(--code-keyword); font-weight: 500; }
+  .tok-string { color: var(--code-string); }
+  .tok-number { color: var(--code-number); }
+  .tok-prop { color: var(--code-prop); }
+  .tok-tag { color: var(--code-tag); }
+  .tok-func { color: var(--code-func); }
+  .tok-punct { color: rgba(232,226,210,0.55); }
+
+  /* ============ INTEGRATION FLOW DIAGRAM ============ */
+  .flow-diagram {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1.5px solid var(--ink);
+    background: var(--paper);
+  }
+  .flow-side {
+    padding: 32px;
+  }
+  .flow-side.a2ui {
+    border-right: 1.5px solid var(--ink);
+    background: linear-gradient(180deg, rgba(200,68,42,0.04), transparent);
+  }
+  .flow-side.copilot {
+    background: linear-gradient(180deg, rgba(30,77,58,0.04), transparent);
+  }
+  .flow-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    margin-bottom: 24px;
+  }
+  .flow-side.a2ui .flow-title { color: var(--accent-a); }
+  .flow-side.copilot .flow-title { color: var(--accent-c); }
+  .flow-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .flow-step {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 14px;
+    align-items: start;
+    padding: 14px 16px;
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    border-left: 3px solid;
+    position: relative;
+  }
+  .flow-side.a2ui .flow-step { border-left-color: var(--accent-a); }
+  .flow-side.copilot .flow-step { border-left-color: var(--accent-c); }
+  .flow-step-num {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--muted);
+    letter-spacing: -0.03em;
+  }
+  .flow-step-content h5 {
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+  .flow-step-content p {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .flow-step-content code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+
+  /* ============ DEVELOPER TOUCHPOINTS COMPARISON ============ */
+  .touch-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+  }
+  .touch-card {
+    background: var(--paper);
+    border: 1.5px solid var(--ink);
+    padding: 32px;
+  }
+  .touch-card.a2ui { border-top: 6px solid var(--accent-a); }
+  .touch-card.copilot { border-top: 6px solid var(--accent-c); }
+  .touch-card h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    margin-bottom: 4px;
+  }
+  .touch-card.a2ui h3 { color: var(--accent-a); }
+  .touch-card.copilot h3 { color: var(--accent-c); }
+  .touch-card-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .touch-list {
+    list-style: none;
+  }
+  .touch-list li {
+    padding: 14px 0;
+    border-top: 1px dashed var(--rule);
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+  .touch-list li:last-child { padding-bottom: 0; }
+  .touch-list .marker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding-top: 2px;
+  }
+  .touch-list .item-text {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .touch-list .item-text strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .touch-list .item-text code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--paper-2);
+    padding: 1px 5px;
+    color: var(--ink);
+    border: 1px solid var(--rule);
+  }
+
+  /* ============ NUANCE / CALLOUT CARDS ============ */
+  .nuance-card {
+    background: var(--paper-2);
+    border-left: 4px solid var(--gold);
+    padding: 32px 36px;
+    margin-top: 56px;
+  }
+  .nuance-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  .nuance-title {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: 12px;
+    line-height: 1.25;
+  }
+  .nuance-body {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+  .nuance-body strong { color: var(--accent-c); font-weight: 600; }
+
+  /* ============ BUNDLED PATTERN ============ */
+  .bundled-section {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .bundled-section .section-title { color: var(--paper); }
+  .bundled-section .section-deck { color: rgba(244,239,230,0.6); }
+  .bundled-section .section-num { color: rgba(244,239,230,0.5); }
+  .bundled-section .section-num::before { background: var(--paper); }
+
+  .bundle-diagram {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 32px;
+  }
+  .bundle-stage {
+    background: rgba(244,239,230,0.04);
+    border: 1px solid rgba(244,239,230,0.12);
+    padding: 24px 20px;
+    position: relative;
+  }
+  .bundle-stage::after {
+    content: '→';
+    position: absolute;
+    right: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gold);
+    font-size: 22px;
+    z-index: 2;
+  }
+  .bundle-stage:last-child::after { display: none; }
+  .bundle-stage-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.15em;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .bundle-stage h5 {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--paper);
+  }
+  .bundle-stage p {
+    font-size: 12px;
+    color: rgba(244,239,230,0.6);
+    line-height: 1.5;
+  }
+  .bundle-stage .tech {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(244,239,230,0.2);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ============ FOOTER ============ */
+  footer {
+    padding: 40px 0;
+    background: var(--ink);
+    color: rgba(244,239,230,0.5);
+    border-top: 1px solid rgba(244,239,230,0.15);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .footer-row {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .footer-row a {
+    color: var(--gold);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(184,137,61,0.3);
+  }
+  .footer-row a:hover { border-bottom-color: var(--gold); }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 1100px) {
+    .wrap { padding: 0 28px; }
+    .catalog-row { grid-template-columns: 180px 1fr 1fr; }
+  }
+  @media (max-width: 880px) {
+    .compare-header { grid-template-columns: 1fr; }
+    .code-grid { grid-template-columns: 1fr; }
+    .flow-diagram { grid-template-columns: 1fr; }
+    .flow-side.a2ui { border-right: none; border-bottom: 1.5px solid var(--ink); }
+    .touch-grid { grid-template-columns: 1fr; }
+    .catalog-row { grid-template-columns: 1fr; }
+    .catalog-row > div { border-right: none; border-bottom: 1px dashed var(--rule); }
+    .catalog-row > div:last-child { border-bottom: none; }
+    .catalog-head { display: none; }
+    .bundle-diagram { grid-template-columns: 1fr; }
+    .bundle-stage::after { right: 50%; top: auto; bottom: -22px; transform: translateX(50%) rotate(90deg); }
+  }
+
+  /* Page-load animations */
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero h1, .hero-deck, .byline {
+    animation: rise 0.9s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+  .hero h1 { animation-delay: 0.1s; }
+  .hero-deck { animation-delay: 0.35s; }
+  .byline { animation-delay: 0.55s; }
+</style>
+</head>
+<body>
+
+<!-- ============ MASTHEAD ============ -->
+<header class="masthead">
+  <div class="wrap mast-row">
+    <div class="brief-tag">— Executive Framework Brief / № 02 —</div>
+    <div class="nav-links">
+      <a href="a2ui-vs-copilotkit-executive-brief.html">01 · Evaluation</a>
+      <a href="#" class="active">02 · Components &amp; Code</a>
+    </div>
+    <div class="edition">EDITION <span>2026.05</span></div>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="wrap">
+    <h1>Components, side<br/>by <em>side.</em></h1>
+    <p class="hero-deck">
+      What does the developer actually write? What does the agent emit? Below
+      are the real building blocks of A2UI and CopilotKit, drawn from official
+      docs, GitHub READMEs, and quickstarts — placed next to one another for
+      direct comparison.
+    </p>
+    <div class="byline">
+      <span>Coverage · <strong>Component Catalog</strong></span>
+      <span>Coverage · <strong>Integration Patterns</strong></span>
+      <span>Coverage · <strong>Code Samples</strong></span>
+      <span>Source Fidelity · <strong>Verbatim from official docs</strong></span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 01 — COMPONENT CATALOG ============ -->
+<section class="catalog-section">
+  <div class="wrap">
+    <div class="section-num">Section 01 — Component Catalog</div>
+    <h2 class="section-title">The <em>building blocks</em> each framework gives you.</h2>
+    <p class="section-deck">
+      A2UI ships an abstract component catalog (the "Basic" set in v0.9) that
+      agents reference by type. CopilotKit ships React/Angular hooks and
+      pre-built UI components that wrap your own design-system widgets. The
+      table below pairs comparable primitives.
+    </p>
+
+    <div class="catalog-table">
+      <div class="catalog-row catalog-head">
+        <div>Capability</div>
+        <div>A2UI · Basic Catalog</div>
+        <div>CopilotKit · React API</div>
+      </div>
+
+      <div class="catalog-row">
+        <div class="cat-cell-name">
+          <h4>Text &amp; Headings</h4>
+          <p>Display text, titles, and rich-text content.</p>
+        </div>
+        <div class="cat-cell-impl a2ui">
+          <strong>Component types</strong>
+          <code>Text</code> with <code>usageHint: "h1"</code><br/>
+          Inline <code>Markdown</code> for rich text.
+          <ul>
+            <li>Bound via <code>literalString</code> or <code>{ "path": "/data/x" }</code></li>
+            <li>Streamed incrementally via JSONL</li>
+          </ul>
+        </div>
+        <div class="cat-cell-impl copilot">
+          <strong>React pattern</strong>
+          Native JSX — <code>&lt;h1&gt;</code>, <code>&lt;Markdown /&gt;</code>, or any component you ship.
+          <ul>
+            <li>Streamed via AG-UI <code>messageDelta</code> events</li>
+            <li>Use <code>&lt;CopilotChat /&gt;</code> for chat-mode rendering</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="catalog-row">
+        <div class="cat-cell-name">
+          <h4>Form Inputs</h4>
+          <p>Text fields, date pickers, selects, checkboxes.</p>
+        </div>
+        <div class="cat-cell-impl a2ui">
+          <strong>Component types</strong>
+          <code>TextField</code>, <code>DateTimeInput</code>, <code>Dropdown</code>, <code>Checkbox</code>.
+          <ul>
+            <li>Bound to a Data Model via JSON-Pointer paths</li>
+            <li>Two-way binding: input updates local model</li>
+            <li>Agent only reads on submit (privacy-by-default)</li>
+          </ul>
+        </div>
+        <div class="cat-cell-impl copilot">
+          <strong>React pattern</strong>
+          Your own form components, registered via <code>useCopilotAction</code>.
+          <ul>
+            <li>Parameters declared with type + description for the LLM</li>
+            <li>Schema enforced at the runtime boundary</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="catalog-row">
+        <div class="cat-cell-name">
+          <h4>Buttons &amp; Actions</h4>
+          <p>User-triggered events sent back to the agent.</p>
+        </div>
+        <div class="cat-cell-impl a2ui">
+          <strong>Component types</strong>
+          <code>Button</code> with an <code>action: { name }</code> payload.
+          <ul>
+            <li>Action sent over A2A or AG-UI back to agent</li>
+            <li>Optional data captured from bound paths</li>
+          </ul>
+        </div>
+        <div class="cat-cell-impl copilot">
+          <strong>React pattern</strong>
+          <code>useCopilotAction({ name, parameters, handler })</code>.
+          <ul>
+            <li>Direct function-call from agent to your handler</li>
+            <li>Optional <code>render</code> for inline UI</li>
+            <li>Optional <code>renderAndWaitForResponse</code> for HITL</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="catalog-row">
+        <div class="cat-cell-name">
+          <h4>Layout &amp; Containers</h4>
+          <p>Cards, columns, lists, tabs.</p>
+        </div>
+        <div class="cat-cell-impl a2ui">
+          <strong>Component types</strong>
+          <code>Card</code>, <code>Row</code>, <code>Column</code>, <code>List</code>, <code>Tabs</code>.
+          <ul>
+            <li>Flat adjacency-list structure (children referenced by ID)</li>
+            <li>LLM-friendly — easy to stream incrementally</li>
+          </ul>
+        </div>
+        <div class="cat-cell-impl copilot">
+          <strong>React pattern</strong>
+          Your design system, unchanged. CopilotKit doesn't impose layout.
+          <ul>
+            <li>Pre-built <code>&lt;CopilotSidebar /&gt;</code>, <code>&lt;CopilotPopup /&gt;</code></li>
+            <li>Headless option for full layout control</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="catalog-row">
+        <div class="cat-cell-name">
+          <h4>Media</h4>
+          <p>Images, video, file embeds.</p>
+        </div>
+        <div class="cat-cell-impl a2ui">
+          <strong>Component types</strong>
+          <code>Image</code>, <code>Video</code> components.
+          <ul>
+            <li>Client-side URL sanitization recommended</li>
+            <li>Use trusted-domain proxies to prevent SSRF</li>
+          </ul>
+        </div>
+        <div class="cat-cell-impl copilot">
+          <strong>React pattern</strong>
+          Multimodal inputs first-class: file uploads, voice, transcripts.
+          <ul>
+            <li>Persistent storage in Threads (Enterprise tier)</li>
+            <li>Voice with auto-transcription</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="catalog-row">
+        <div class="cat-cell-name">
+          <h4>Custom Components</h4>
+          <p>Your own widgets — charts, maps, dashboards.</p>
+        </div>
+        <div class="cat-cell-impl a2ui">
+          <strong>BYOC pattern</strong>
+          Define a Catalog with <code>Zod</code> schemas. Register via the host's renderer; description is injected into the agent prompt.
+          <ul>
+            <li>One catalog, many platforms (Web, Flutter, Angular)</li>
+          </ul>
+        </div>
+        <div class="cat-cell-impl copilot">
+          <strong>React pattern</strong>
+          Pass any React component into <code>render</code> in <code>useCopilotAction</code>.
+          <ul>
+            <li>Agent sends args; component renders with them</li>
+            <li>Real-time updates as agent streams state</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="catalog-row">
+        <div class="cat-cell-name">
+          <h4>State Sharing</h4>
+          <p>Agent ↔ application synchronized state.</p>
+        </div>
+        <div class="cat-cell-impl a2ui">
+          <strong>Data Model</strong>
+          A2UI defines a separate Data Model object. Components bind via JSON-Pointer paths (e.g. <code>/reservation/date</code>).
+          <ul>
+            <li>Server-pushed <code>updateDataModel</code> messages</li>
+            <li>Strict upsert semantics</li>
+          </ul>
+        </div>
+        <div class="cat-cell-impl copilot">
+          <strong>useCoAgent / useAgent</strong>
+          Bidirectional state hook — your React state is the agent's state.
+          <ul>
+            <li>Read-only or read-write modes</li>
+            <li>Streamed event-sourced diffs with conflict resolution</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="catalog-row">
+        <div class="cat-cell-name">
+          <h4>Human-in-the-Loop</h4>
+          <p>Approvals, edits, mid-run pauses.</p>
+        </div>
+        <div class="cat-cell-impl a2ui">
+          <strong>Pattern</strong>
+          Agent emits an approval surface (e.g. a Card with two Buttons). User action returns to agent over the transport.
+          <ul>
+            <li>HITL is possible but not a first-class primitive</li>
+          </ul>
+        </div>
+        <div class="cat-cell-impl copilot">
+          <strong>renderAndWaitForResponse</strong>
+          Built-in HITL primitive. Agent pauses; UI awaits a <code>respond()</code> call.
+          <ul>
+            <li>Approve / reject / edit flows out of the box</li>
+            <li>Captured in persistent Threads</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="nuance-card">
+      <div class="nuance-label">Read this carefully</div>
+      <h4 class="nuance-title">A2UI lists <em>component types</em>. CopilotKit lists <em>developer hooks</em>.</h4>
+      <p class="nuance-body">
+        This asymmetry reflects the different layers each operates at. A2UI is
+        the wire format your agent speaks. CopilotKit is the framework your
+        React app uses to consume that wire format (and others). In the
+        recommended pattern from the executive brief, you write
+        <strong>CopilotKit hooks on the client</strong> while your agents
+        <strong>emit A2UI on the server</strong> — the two catalogs above are
+        complementary tools, not duplicate ones.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 02 — INTEGRATION CODE ============ -->
+<section>
+  <div class="wrap">
+    <div class="section-num">Section 02 — Integration Samples</div>
+    <h2 class="section-title">Hello world, in <em>both languages.</em></h2>
+    <p class="section-deck">
+      A simple booking flow expressed natively in each framework. The A2UI
+      sample is the agent-emitted JSON payload (verbatim from the official
+      Quickstart). The CopilotKit sample is the React code (verbatim from the
+      official package README).
+    </p>
+
+    <div class="compare-header">
+      <div class="compare-col-head a2ui">
+        <span class="compare-col-tag">Sample 01 · Agent Output</span>
+        <h3 class="compare-col-name">A2UI</h3>
+        <p class="compare-col-tagline">JSONL streamed by the agent → rendered natively</p>
+      </div>
+      <div class="compare-col-head copilot">
+        <span class="compare-col-tag">Sample 01 · Client Code</span>
+        <h3 class="compare-col-name">CopilotKit</h3>
+        <p class="compare-col-tagline">React hook on the client → handler called by agent</p>
+      </div>
+    </div>
+
+    <div class="code-grid">
+      <!-- A2UI CODE PANEL -->
+      <div class="code-panel">
+        <div class="code-header">
+          <div class="code-header-left">
+            <div class="code-traffic"><span></span><span></span><span></span></div>
+            <span class="filename">agent → client · <b>booking.jsonl</b></span>
+          </div>
+          <span class="lang-tag">JSONL</span>
+        </div>
+<pre class="code-body"><span class="tok-comment">// 1. Initialize the surface (one-time setup)</span>
+{<span class="tok-prop">"version"</span>: <span class="tok-string">"v0.9"</span>, <span class="tok-prop">"createSurface"</span>: {
+  <span class="tok-prop">"surfaceId"</span>: <span class="tok-string">"main"</span>,
+  <span class="tok-prop">"catalogId"</span>: <span class="tok-string">"https://a2ui.org/specification/v0_9/basic_catalog.json"</span>
+}}
+
+<span class="tok-comment">// 2. Stream the component tree (flat list with IDs)</span>
+{<span class="tok-prop">"surfaceUpdate"</span>: {
+  <span class="tok-prop">"surfaceId"</span>: <span class="tok-string">"main"</span>,
+  <span class="tok-prop">"components"</span>: [
+    {<span class="tok-prop">"id"</span>: <span class="tok-string">"header"</span>, <span class="tok-prop">"component"</span>: {
+      <span class="tok-prop">"Text"</span>: {
+        <span class="tok-prop">"text"</span>: { <span class="tok-prop">"literalString"</span>: <span class="tok-string">"Book Your Table"</span> },
+        <span class="tok-prop">"usageHint"</span>: <span class="tok-string">"h1"</span>
+      }}},
+    {<span class="tok-prop">"id"</span>: <span class="tok-string">"date-picker"</span>, <span class="tok-prop">"component"</span>: {
+      <span class="tok-prop">"DateTimeInput"</span>: {
+        <span class="tok-prop">"label"</span>: { <span class="tok-prop">"literalString"</span>: <span class="tok-string">"Select Date"</span> },
+        <span class="tok-prop">"value"</span>: { <span class="tok-prop">"path"</span>: <span class="tok-string">"/reservation/date"</span> },
+        <span class="tok-prop">"enableDate"</span>: <span class="tok-keyword">true</span>
+      }}},
+    {<span class="tok-prop">"id"</span>: <span class="tok-string">"submit-btn"</span>, <span class="tok-prop">"component"</span>: {
+      <span class="tok-prop">"Button"</span>: {
+        <span class="tok-prop">"child"</span>: <span class="tok-string">"submit-text"</span>,
+        <span class="tok-prop">"action"</span>: { <span class="tok-prop">"name"</span>: <span class="tok-string">"confirm_booking"</span> }
+      }}}
+  ]
+}}
+
+<span class="tok-comment">// 3. Update bound data (streamed separately for incremental updates)</span>
+{<span class="tok-prop">"dataModelUpdate"</span>: {
+  <span class="tok-prop">"surfaceId"</span>: <span class="tok-string">"main"</span>,
+  <span class="tok-prop">"contents"</span>: [{ <span class="tok-prop">"key"</span>: <span class="tok-string">"reservation"</span>, <span class="tok-prop">"valueMap"</span>: [
+    { <span class="tok-prop">"key"</span>: <span class="tok-string">"date"</span>,   <span class="tok-prop">"valueString"</span>: <span class="tok-string">"2025-12-15"</span> },
+    { <span class="tok-prop">"key"</span>: <span class="tok-string">"time"</span>,   <span class="tok-prop">"valueString"</span>: <span class="tok-string">"19:00"</span> },
+    { <span class="tok-prop">"key"</span>: <span class="tok-string">"guests"</span>, <span class="tok-prop">"valueInt"</span>: <span class="tok-number">2</span> }
+  ]}]
+}}</pre>
+      </div>
+
+      <!-- COPILOTKIT CODE PANEL -->
+      <div class="code-panel">
+        <div class="code-header">
+          <div class="code-header-left">
+            <div class="code-traffic"><span></span><span></span><span></span></div>
+            <span class="filename">client app · <b>BookingPanel.tsx</b></span>
+          </div>
+          <span class="lang-tag">TSX</span>
+        </div>
+<pre class="code-body"><span class="tok-keyword">import</span> { useCopilotAction } <span class="tok-keyword">from</span> <span class="tok-string">"@copilotkit/react-core"</span>;
+<span class="tok-keyword">import</span> { FlightCard } <span class="tok-keyword">from</span> <span class="tok-string">"./components"</span>;
+
+<span class="tok-comment">// Verbatim shape from the official CopilotKit landing page.</span>
+<span class="tok-keyword">export function</span> <span class="tok-func">BookingPanel</span>() {
+
+  <span class="tok-comment">// 1. Register an action the agent can call.</span>
+  <span class="tok-comment">//    The agent learns about it from `name` + `description`.</span>
+  <span class="tok-func">useCopilotAction</span>({
+    <span class="tok-prop">name</span>: <span class="tok-string">"showFlight"</span>,
+    <span class="tok-prop">description</span>: <span class="tok-string">"Display a flight card for the user"</span>,
+    <span class="tok-prop">parameters</span>: [
+      { <span class="tok-prop">name</span>: <span class="tok-string">"flight"</span>,  <span class="tok-prop">type</span>: <span class="tok-string">"object"</span>, <span class="tok-prop">required</span>: <span class="tok-keyword">true</span> },
+      { <span class="tok-prop">name</span>: <span class="tok-string">"status"</span>,  <span class="tok-prop">type</span>: <span class="tok-string">"string"</span> }
+    ],
+
+    <span class="tok-comment">// 2. The agent's call renders YOUR React component.</span>
+    <span class="tok-prop">render</span>: ({ <span class="tok-prop">args</span> }) =&gt; (
+      &lt;<span class="tok-tag">FlightCard</span>
+        <span class="tok-prop">flight</span>={args.flight}
+        <span class="tok-prop">status</span>={args.status}
+      /&gt;
+    )
+  });
+
+  <span class="tok-comment">// 3. (optional) Human-in-the-Loop: pause for user approval.</span>
+  <span class="tok-func">useCopilotAction</span>({
+    <span class="tok-prop">name</span>: <span class="tok-string">"confirm_booking"</span>,
+    <span class="tok-prop">parameters</span>: [
+      { <span class="tok-prop">name</span>: <span class="tok-string">"booking"</span>, <span class="tok-prop">type</span>: <span class="tok-string">"object"</span>, <span class="tok-prop">required</span>: <span class="tok-keyword">true</span> }
+    ],
+    <span class="tok-prop">renderAndWaitForResponse</span>: ({ args, status, respond }) =&gt; (
+      &lt;<span class="tok-tag">ConfirmationCard</span>
+        <span class="tok-prop">booking</span>={args.booking}
+        <span class="tok-prop">isExecuting</span>={status === <span class="tok-string">"executing"</span>}
+        <span class="tok-prop">onCancel</span>={() =&gt; respond?.({ <span class="tok-prop">approved</span>: <span class="tok-keyword">false</span> })}
+        <span class="tok-prop">onConfirm</span>={() =&gt; respond?.({ <span class="tok-prop">approved</span>: <span class="tok-keyword">true</span> })}
+      /&gt;
+    )
+  });
+
+  <span class="tok-keyword">return</span> &lt;<span class="tok-tag">CopilotSidebar</span> /&gt;;
+}</pre>
+      </div>
+    </div>
+
+    <!-- SECOND PAIR: BOOTSTRAPPING -->
+    <div class="compare-header" style="margin-top:64px;">
+      <div class="compare-col-head a2ui">
+        <span class="compare-col-tag">Sample 02 · Server Bootstrap</span>
+        <h3 class="compare-col-name">A2UI Agent Setup</h3>
+        <p class="compare-col-tagline">Python · Google ADK · A2UI Schema Manager</p>
+      </div>
+      <div class="compare-col-head copilot">
+        <span class="compare-col-tag">Sample 02 · App Bootstrap</span>
+        <h3 class="compare-col-name">CopilotKit Provider</h3>
+        <p class="compare-col-tagline">Next.js · React provider tree</p>
+      </div>
+    </div>
+
+    <div class="code-grid">
+      <!-- A2UI BOOTSTRAP -->
+      <div class="code-panel">
+        <div class="code-header">
+          <div class="code-header-left">
+            <div class="code-traffic"><span></span><span></span><span></span></div>
+            <span class="filename">agent · <b>agent.py</b></span>
+          </div>
+          <span class="lang-tag">PYTHON</span>
+        </div>
+<pre class="code-body"><span class="tok-comment"># From a2ui.org/guides/agent-development</span>
+<span class="tok-keyword">from</span> google.adk.agents.llm_agent <span class="tok-keyword">import</span> Agent
+<span class="tok-keyword">from</span> a2ui_sdk <span class="tok-keyword">import</span> A2uiSchemaManager, BasicCatalog
+
+<span class="tok-comment"># 1. Initialize the schema manager with the Basic Catalog.</span>
+<span class="tok-comment">#    This builds a JSON Schema the LLM is constrained to.</span>
+schema_manager = <span class="tok-func">A2uiSchemaManager</span>(
+    version=VERSION_0_9,
+    catalogs=[<span class="tok-func">BasicCatalog</span>()]
+)
+
+<span class="tok-comment"># 2. Compose the system prompt with rules + schema + examples.</span>
+AGENT_INSTRUCTION = <span class="tok-string">"""
+You are a restaurant finding assistant.
+Your final output MUST be an A2UI UI JSON response,
+following the schema and rules below.
+"""</span>
+
+<span class="tok-comment"># 3. Define the agent. The LLM is free to choose any</span>
+<span class="tok-comment">#    component from the trusted catalog — and ONLY those.</span>
+root_agent = <span class="tok-func">Agent</span>(
+    model=<span class="tok-string">"gemini-2.5-flash"</span>,
+    name=<span class="tok-string">"restaurant_agent"</span>,
+    description=<span class="tok-string">"Finds restaurants and books tables."</span>,
+    instruction=AGENT_INSTRUCTION + schema_manager.<span class="tok-func">prompt</span>(),
+    tools=[get_restaurants],
+)
+
+<span class="tok-comment"># 4. Validate every LLM output against A2UI_SCHEMA</span>
+<span class="tok-comment">#    before sending it on the wire (defence in depth).</span>
+jsonschema.<span class="tok-func">validate</span>(
+    instance=parsed_json,
+    schema=schema_manager.a2ui_schema_object
+)</pre>
+      </div>
+
+      <!-- COPILOTKIT BOOTSTRAP -->
+      <div class="code-panel">
+        <div class="code-header">
+          <div class="code-header-left">
+            <div class="code-traffic"><span></span><span></span><span></span></div>
+            <span class="filename">app · <b>app/layout.tsx</b></span>
+          </div>
+          <span class="lang-tag">TSX</span>
+        </div>
+<pre class="code-body"><span class="tok-comment">// From CopilotKit official docs (Next.js App Router).</span>
+<span class="tok-keyword">import</span> { CopilotKit } <span class="tok-keyword">from</span> <span class="tok-string">"@copilotkit/react-core"</span>;
+<span class="tok-keyword">import</span> <span class="tok-string">"@copilotkit/react-ui/styles.css"</span>;
+
+<span class="tok-keyword">export default function</span> <span class="tok-func">RootLayout</span>({
+  children,
+}: { children: React.ReactNode }) {
+  <span class="tok-keyword">return</span> (
+    &lt;<span class="tok-tag">html</span> <span class="tok-prop">lang</span>=<span class="tok-string">"en"</span>&gt;
+      &lt;<span class="tok-tag">body</span>&gt;
+        <span class="tok-comment">{/* One provider wraps the whole app. */}</span>
+        &lt;<span class="tok-tag">CopilotKit</span> <span class="tok-prop">runtimeUrl</span>=<span class="tok-string">"/api/copilotkit"</span>&gt;
+          {children}
+        &lt;/<span class="tok-tag">CopilotKit</span>&gt;
+      &lt;/<span class="tok-tag">body</span>&gt;
+    &lt;/<span class="tok-tag">html</span>&gt;
+  );
+}
+
+<span class="tok-comment">// app/api/copilotkit/route.ts — the runtime endpoint.</span>
+<span class="tok-keyword">import</span> {
+  CopilotRuntime,
+  copilotRuntimeNextJSAppRouterEndpoint,
+} <span class="tok-keyword">from</span> <span class="tok-string">"@copilotkit/runtime"</span>;
+
+<span class="tok-keyword">const</span> runtime = <span class="tok-keyword">new</span> <span class="tok-func">CopilotRuntime</span>({
+  <span class="tok-comment">// Plug in any agent: LangGraph, Mastra, ADK, Agent Spec…</span>
+  <span class="tok-prop">agents</span>: { restaurant_agent: <span class="tok-string">"http://localhost:8000"</span> },
+
+  <span class="tok-comment">// Turn ON A2UI rendering for declarative generative UI.</span>
+  <span class="tok-prop">a2ui</span>: { <span class="tok-prop">enabled</span>: <span class="tok-keyword">true</span>, <span class="tok-prop">catalog</span>: myComponentCatalog },
+});
+
+<span class="tok-keyword">export const</span> { POST } = <span class="tok-func">copilotRuntimeNextJSAppRouterEndpoint</span>({
+  runtime, endpoint: <span class="tok-string">"/api/copilotkit"</span>,
+});</pre>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ SECTION 03 — INTEGRATION FLOWS ============ -->
+<section>
+  <div class="wrap">
+    <div class="section-num">Section 03 — Integration Flow</div>
+    <h2 class="section-title">From user prompt to <em>rendered widget.</em></h2>
+    <p class="section-deck">
+      Step-by-step lifecycle of a single user request, traced through each
+      framework's runtime. Both end at the same place — pixels on the screen —
+      but they take meaningfully different paths to get there.
+    </p>
+
+    <div class="flow-diagram">
+
+      <!-- A2UI FLOW -->
+      <div class="flow-side a2ui">
+        <h3 class="flow-title">A2UI · Lifecycle</h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">01</div>
+            <div class="flow-step-content">
+              <h5>User prompts the agent</h5>
+              <p>Plain text: "Book me a table for 2 tomorrow at 7."</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">02</div>
+            <div class="flow-step-content">
+              <h5>Agent generates A2UI JSON</h5>
+              <p>LLM produces a JSONL stream conforming to the
+                 <code>A2UI_SCHEMA</code>. Schema validation is performed.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">03</div>
+            <div class="flow-step-content">
+              <h5>Transport delivers the message</h5>
+              <p>A2A protocol or AG-UI carries each JSONL line via SSE.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">04</div>
+            <div class="flow-step-content">
+              <h5>Client renderer parses the payload</h5>
+              <p>The renderer walks the flat component list, builds the tree
+                 from <code>id</code> references, and resolves data bindings.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">05</div>
+            <div class="flow-step-content">
+              <h5>Native widgets are mounted</h5>
+              <p>Component types from the trusted catalog map to React /
+                 Flutter / Lit / Angular implementations. No code execution.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">06</div>
+            <div class="flow-step-content">
+              <h5>User interaction → action message</h5>
+              <p>Click sends a <code>userAction</code> A2A message back. Agent
+                 may reply with <code>surfaceUpdate</code> or
+                 <code>updateDataModel</code>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COPILOTKIT FLOW -->
+      <div class="flow-side copilot">
+        <h3 class="flow-title">CopilotKit · Lifecycle</h3>
+        <div class="flow-steps">
+          <div class="flow-step">
+            <div class="flow-step-num">01</div>
+            <div class="flow-step-content">
+              <h5>User prompts the copilot</h5>
+              <p>Via <code>&lt;CopilotChat /&gt;</code> or <code>&lt;CopilotSidebar /&gt;</code>
+                 — or programmatically via <code>useAgent()</code>.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">02</div>
+            <div class="flow-step-content">
+              <h5>Runtime forwards to the backend agent</h5>
+              <p><code>CopilotRuntime</code> routes the message to LangGraph,
+                 Mastra, ADK, or whichever agent is configured.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">03</div>
+            <div class="flow-step-content">
+              <h5>Agent emits AG-UI events</h5>
+              <p>Stream of typed events: <code>messageDelta</code>,
+                 <code>toolCall</code>, <code>stateUpdate</code>,
+                 <code>uiSurface</code> (which can carry A2UI).</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">04</div>
+            <div class="flow-step-content">
+              <h5>React hooks dispatch the events</h5>
+              <p><code>useCopilotAction</code> matches by <code>name</code>;
+                 <code>useCoAgent</code> updates shared state in place.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">05</div>
+            <div class="flow-step-content">
+              <h5>Your React components render</h5>
+              <p>The hook's <code>render</code> function returns JSX with the
+                 typed args. A2UI surfaces are handled by the A2UI renderer.</p>
+            </div>
+          </div>
+          <div class="flow-step">
+            <div class="flow-step-num">06</div>
+            <div class="flow-step-content">
+              <h5>State persists in the Thread</h5>
+              <p>Enterprise tier: full interaction trace (UI, HITL, files,
+                 voice) saved to the Thread for cross-session resume.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ SECTION 04 — DEVELOPER TOUCHPOINTS ============ -->
+<section>
+  <div class="wrap">
+    <div class="section-num">Section 04 — Developer Touchpoints</div>
+    <h2 class="section-title">Where the engineer's hands <em>actually go.</em></h2>
+    <p class="section-deck">
+      The contact surface is small in both frameworks once you see it laid out.
+      Here are the primitives an engineer touches in a typical day's work.
+    </p>
+
+    <div class="touch-grid">
+
+      <div class="touch-card a2ui">
+        <h3>A2UI</h3>
+        <div class="touch-card-tag">Server-side primitives · Apache 2.0</div>
+        <ul class="touch-list">
+          <li>
+            <span class="marker">A1</span>
+            <span class="item-text">
+              <strong><code>A2uiSchemaManager</code></strong>
+              Server-side helper that builds the LLM system prompt with the
+              schema, examples, and your custom catalog.
+            </span>
+          </li>
+          <li>
+            <span class="marker">A2</span>
+            <span class="item-text">
+              <strong><code>BasicCatalog</code></strong>
+              The default component set. You ship a custom catalog for your
+              domain components (charts, maps, etc.).
+            </span>
+          </li>
+          <li>
+            <span class="marker">A3</span>
+            <span class="item-text">
+              <strong>JSONL message envelopes</strong>
+              <code>createSurface</code>, <code>surfaceUpdate</code>,
+              <code>dataModelUpdate</code>, <code>deleteSurface</code>.
+            </span>
+          </li>
+          <li>
+            <span class="marker">A4</span>
+            <span class="item-text">
+              <strong>JSON-Pointer data bindings</strong>
+              Components reference state via paths like
+              <code>/reservation/date</code>; client manages the model.
+            </span>
+          </li>
+          <li>
+            <span class="marker">A5</span>
+            <span class="item-text">
+              <strong>Renderer per platform</strong>
+              Drop in the official renderer for React, Angular, Lit, or
+              Flutter. Wraps your own widgets.
+            </span>
+          </li>
+          <li>
+            <span class="marker">A6</span>
+            <span class="item-text">
+              <strong>Schema validation</strong>
+              <code>jsonschema.validate()</code> on every agent output catches
+              malformed UI before it reaches the wire.
+            </span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="touch-card copilot">
+        <h3>CopilotKit</h3>
+        <div class="touch-card-tag">Client-side React/Angular hooks · MIT</div>
+        <ul class="touch-list">
+          <li>
+            <span class="marker">C1</span>
+            <span class="item-text">
+              <strong><code>&lt;CopilotKit&gt;</code> provider</strong>
+              Wrap your app once with <code>runtimeUrl</code>. All hooks
+              underneath get the connection.
+            </span>
+          </li>
+          <li>
+            <span class="marker">C2</span>
+            <span class="item-text">
+              <strong><code>useCopilotAction()</code></strong>
+              Register an action with name, parameters, and a
+              <code>render</code> function — the agent gets a tool, the user
+              gets UI.
+            </span>
+          </li>
+          <li>
+            <span class="marker">C3</span>
+            <span class="item-text">
+              <strong><code>useCoAgent()</code> / <code>useAgent()</code></strong>
+              Bidirectional state sync between React and the agent. Modern
+              <code>useAgent</code> is the v2 superset.
+            </span>
+          </li>
+          <li>
+            <span class="marker">C4</span>
+            <span class="item-text">
+              <strong><code>useCopilotReadable()</code></strong>
+              Expose any piece of app state to the agent as readable context.
+              No prompt-engineering required.
+            </span>
+          </li>
+          <li>
+            <span class="marker">C5</span>
+            <span class="item-text">
+              <strong><code>renderAndWaitForResponse</code></strong>
+              First-class HITL: the agent pauses, your component captures the
+              user's decision, then <code>respond()</code> resumes it.
+            </span>
+          </li>
+          <li>
+            <span class="marker">C6</span>
+            <span class="item-text">
+              <strong>Pre-built UI: <code>&lt;CopilotSidebar&gt;</code></strong>
+              Drop-in chat UI with deep CSS + sub-component customization.
+              Or go fully headless with <code>useCopilotKit()</code>.
+            </span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 05 — RECOMMENDED COMBINED ARCHITECTURE ============ -->
+<section class="bundled-section">
+  <div class="wrap">
+    <div class="section-num">Section 05 — Recommended Architecture</div>
+    <h2 class="section-title">The <em>recommended</em> combined stack.</h2>
+    <p class="section-deck">
+      As recommended in the executive brief: adopt CopilotKit with A2UI
+      rendering enabled. The four-stage architecture below is what that looks
+      like in production — each layer with its concrete technology choice.
+    </p>
+
+    <div class="bundle-diagram">
+      <div class="bundle-stage">
+        <div class="bundle-stage-num">01 · BACKEND</div>
+        <h5>Agent Reasoning</h5>
+        <p>The agent that thinks, plans, and uses tools to gather information
+           or perform actions on the user's behalf.</p>
+        <div class="tech">LangGraph · ADK · Mastra · MAF</div>
+      </div>
+      <div class="bundle-stage">
+        <div class="bundle-stage-num">02 · PAYLOAD</div>
+        <h5>UI Description</h5>
+        <p>Agent emits a declarative component-tree that describes intent.
+           Schema-validated, no executable code.</p>
+        <div class="tech">A2UI v0.9 · JSONL</div>
+      </div>
+      <div class="bundle-stage">
+        <div class="bundle-stage-num">03 · TRANSPORT</div>
+        <h5>Bidirectional Stream</h5>
+        <p>Carries A2UI surfaces, tool calls, state diffs, HITL pauses, and
+           voice/file events between agent and frontend.</p>
+        <div class="tech">AG-UI Protocol · SSE / WebSocket</div>
+      </div>
+      <div class="bundle-stage">
+        <div class="bundle-stage-num">04 · CLIENT</div>
+        <h5>Rendering &amp; State</h5>
+        <p>React app consumes the stream, renders A2UI surfaces with your
+           native components, and manages shared state.</p>
+        <div class="tech">CopilotKit React SDK</div>
+      </div>
+    </div>
+
+    <div class="nuance-card" style="background: rgba(244,239,230,0.06); border-left-color: var(--gold); margin-top: 56px;">
+      <div class="nuance-label" style="color: #d9b46a;">Why this combination is the right answer</div>
+      <h4 class="nuance-title" style="color: var(--paper);">Each layer plays to its strength.</h4>
+      <p class="nuance-body" style="color: rgba(244,239,230,0.85);">
+        A2UI gives you cross-platform portability and security-by-design at
+        the payload layer. AG-UI gives you a production-tested transport with
+        guardrails. CopilotKit gives you the React SDK, persistence, and
+        enterprise governance. Used together, no layer is overburdened, and
+        no layer is reinvented in-house. <strong style="color:#d9b46a">This is the architecture
+        Oracle, Microsoft, and Google have publicly aligned around.</strong>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap footer-row">
+    <div>Executive Framework Brief · 02 · Components &amp; Integration</div>
+    <div>
+      <a href="a2ui-vs-copilotkit-executive-brief.html">← Back to Evaluation Brief</a>
+    </div>
+    <div>2026.05 · Internal Demo</div>
+  </div>
+</footer>
+
+</body>
+</html>
